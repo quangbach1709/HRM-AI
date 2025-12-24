@@ -7,6 +7,9 @@ import com.hrm.backend.repository.DepartmentRepository;
 import com.hrm.backend.service.DepartmentService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +23,7 @@ import java.util.stream.Collectors;
 public class DepartmentServiceImpl implements DepartmentService {
 
     private final DepartmentRepository departmentRepository;
-    
+
     @Autowired
     public DepartmentServiceImpl(DepartmentRepository departmentRepository) {
         this.departmentRepository = departmentRepository;
@@ -119,24 +122,26 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DepartmentDto> searchByKeyword(SearchDto searchDto) {
-        List<Department> results;
+    public Page<DepartmentDto> searchByKeyword(SearchDto searchDto) {
+        int page = searchDto.getPageIndex() != null ? searchDto.getPageIndex() : 0;
+        int size = searchDto.getPageSize() != null ? searchDto.getPageSize() : 10;
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Department> result;
 
         if (searchDto.getParentId() != null) {
             // Get sub-departments of a parent
-            results = departmentRepository.findByParentIdAndVoidedFalseOrderByNameAsc(searchDto.getParentId());
+            result = departmentRepository.findByParentIdAndVoidedFalse(searchDto.getParentId(), pageable);
         } else if (searchDto.getKeyword() != null && !searchDto.getKeyword().trim().isEmpty()) {
             // Search by keyword
-            results = departmentRepository.searchByKeywordList(searchDto.getKeyword().trim());
+            result = departmentRepository.searchByKeyword(searchDto.getKeyword().trim(), pageable);
         } else {
             // Get root departments (no parent) - for tree structure
-            results = departmentRepository.findByParentIsNullAndVoidedFalseOrderByNameAsc();
+            result = departmentRepository.findByParentIsNullAndVoidedFalse(pageable);
         }
 
-        // Convert to DTOs with subRows for tree structure
-        return results.stream()
-                .map(dept -> new DepartmentDto(dept, false, true, false))
-                .collect(Collectors.toList());
+        // Convert to DTOs with subRows
+        return result.map(dept -> new DepartmentDto(dept, false, true, false));
     }
 
     // Additional helper methods
