@@ -15,28 +15,32 @@ import java.util.UUID;
 @Repository
 public interface DepartmentRepository extends JpaRepository<Department, UUID> {
 
-    Optional<Department> findByCode(String code);
+        Optional<Department> findByCode(String code);
 
-    boolean existsByCode(String code);
+        boolean existsByCode(String code);
 
-    // Find all root departments (no parent)
-    List<Department> findByParentIsNullAndVoidedFalseOrderByNameAsc();
+        // Find all root departments (no parent)
+        List<Department> findByParentIsNullAndVoidedFalseOrderByNameAsc();
 
-    // Find sub-departments by parent
-    List<Department> findByParentIdAndVoidedFalseOrderByNameAsc(UUID parentId);
+        Page<Department> findByParentIsNullAndVoidedFalse(Pageable pageable);
 
-    // Search by name or code
-    @Query("SELECT d FROM Department d WHERE d.voided = false AND " +
-            "(LOWER(d.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "LOWER(d.code) LIKE LOWER(CONCAT('%', :keyword, '%')))")
-    Page<Department> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
+        // Find sub-departments by parent
+        List<Department> findByParentIdAndVoidedFalseOrderByNameAsc(UUID parentId);
 
-    // Find all active departments
-    List<Department> findByVoidedFalseOrderByNameAsc();
+        Page<Department> findByParentIdAndVoidedFalse(UUID parentId, Pageable pageable);
 
-    // Search by name or code - returns List
-    @Query("SELECT d FROM Department d WHERE d.voided = false AND " +
-            "(LOWER(d.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "LOWER(d.code) LIKE LOWER(CONCAT('%', :keyword, '%'))) ORDER BY d.name ASC")
-    List<Department> searchByKeywordList(@Param("keyword") String keyword);
+        // Search by name or code
+        @Query("SELECT d FROM Department d WHERE d.voided = false AND " +
+                        "(LOWER(d.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                        "LOWER(d.code) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+        Page<Department> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
+
+        // Find all active departments
+        List<Department> findByVoidedFalseOrderByNameAsc();
+
+        // Search by name or code - returns List
+        @Query("SELECT d FROM Department d WHERE d.voided = false AND " +
+                        "(LOWER(d.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                        "LOWER(d.code) LIKE LOWER(CONCAT('%', :keyword, '%'))) ORDER BY d.name ASC")
+        List<Department> searchByKeywordList(@Param("keyword") String keyword);
 }

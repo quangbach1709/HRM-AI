@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +24,7 @@ public class DepartmentController {
     private final DepartmentServiceImpl departmentService;
 
     @Autowired
-    public  DepartmentController(DepartmentServiceImpl departmentService) {
+    public DepartmentController(DepartmentServiceImpl departmentService) {
         this.departmentService = departmentService;
     }
 
@@ -43,8 +44,8 @@ public class DepartmentController {
 
     // POST /api/departments/search - Search with SearchDto
     @PostMapping("/search")
-    public ResponseEntity<List<DepartmentDto>> searchDepartments(@RequestBody SearchDto searchDto) {
-        List<DepartmentDto> result = departmentService.searchByKeyword(searchDto);
+    public ResponseEntity<Page<DepartmentDto>> searchDepartments(@RequestBody SearchDto searchDto) {
+        Page<DepartmentDto> result = departmentService.searchByKeyword(searchDto);
         return ResponseEntity.ok(result);
     }
 
