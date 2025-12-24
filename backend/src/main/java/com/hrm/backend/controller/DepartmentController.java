@@ -1,15 +1,16 @@
 package com.hrm.backend.controller;
 
 import com.hrm.backend.dto.DepartmentDto;
+import com.hrm.backend.dto.response.PageResponse;
+import com.hrm.backend.dto.search.SearchDepartmentDto;
 import com.hrm.backend.dto.search.SearchDto;
-import com.hrm.backend.service.impl.DepartmentServiceImpl;
+import com.hrm.backend.service.DepartmentService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.data.domain.Page;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,49 +22,91 @@ import java.util.UUID;
 @CrossOrigin(origins = { "http://localhost:5173", "http://localhost:3000" })
 public class DepartmentController {
 
-    private final DepartmentServiceImpl departmentService;
-
     @Autowired
-    public DepartmentController(DepartmentServiceImpl departmentService) {
-        this.departmentService = departmentService;
+    private DepartmentService departmentService;
+
+    /**
+     * API phân trang MỚI - Hỗ trợ đầy đủ filter và sort động
+     * POST /api/departments/search
+     */
+    @PostMapping("/search")
+    public ResponseEntity<PageResponse<DepartmentDto>> searchDepartments(
+            @RequestBody SearchDepartmentDto dto) {
+        PageResponse<DepartmentDto> response = departmentService.searchDepartments(dto);
+        return ResponseEntity.ok(response);
     }
 
-    // GET /api/departments - Get all departments as flat list
+    /**
+     * API phân trang CŨ - BACKWARD COMPATIBLE
+     * POST /api/departments/paging
+     */
+    @PostMapping("/paging")
+    public ResponseEntity<PageResponse<DepartmentDto>> pagingDepartments(
+            @RequestBody SearchDto dto) {
+        PageResponse<DepartmentDto> response = departmentService.pagingDepartments(dto);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * API GET với query params - cho filter đơn giản
+     * GET
+     * /api/departments?pageIndex=0&pageSize=10&keyword=abc&sortBy=name&sortDirection=ASC
+     */
     @GetMapping
+    public ResponseEntity<PageResponse<DepartmentDto>> getDepartments(
+            @RequestParam(defaultValue = "0") Integer pageIndex,
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) UUID parentId,
+            @RequestParam(required = false) String code,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Boolean voided,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDirection) {
+
+        SearchDepartmentDto dto = new SearchDepartmentDto();
+        dto.setPageIndex(pageIndex);
+        dto.setPageSize(pageSize);
+        dto.setKeyword(keyword);
+        dto.setParentId(parentId);
+        dto.setCode(code);
+        dto.setName(name);
+        dto.setVoided(voided);
+        dto.setSortBy(sortBy);
+        dto.setSortDirection(sortDirection);
+
+        return ResponseEntity.ok(departmentService.searchDepartments(dto));
+    }
+
+    // GET /api/departments/all - Lấy tất cả (cho dropdown, select)
+    @GetMapping("/all")
     public ResponseEntity<List<DepartmentDto>> getAllDepartments() {
         List<DepartmentDto> departments = departmentService.getAllDepartments();
         return ResponseEntity.ok(departments);
     }
 
-    // GET /api/departments/tree - Get departments as tree structure
+    // GET /api/departments/tree - Lấy dạng cây
     @GetMapping("/tree")
     public ResponseEntity<List<DepartmentDto>> getDepartmentTree() {
         List<DepartmentDto> tree = departmentService.getDepartmentTree();
         return ResponseEntity.ok(tree);
     }
 
-    // POST /api/departments/search - Search with SearchDto
-    @PostMapping("/search")
-    public ResponseEntity<Page<DepartmentDto>> searchDepartments(@RequestBody SearchDto searchDto) {
-        Page<DepartmentDto> result = departmentService.searchByKeyword(searchDto);
-        return ResponseEntity.ok(result);
-    }
-
-    // GET /api/departments/{id} - Get department by ID
+    // GET /api/departments/{id} - Lấy theo ID
     @GetMapping("/{id}")
     public ResponseEntity<DepartmentDto> getDepartmentById(@PathVariable UUID id) {
         DepartmentDto department = departmentService.getById(id);
         return ResponseEntity.ok(department);
     }
 
-    // POST /api/departments - Create new department
+    // POST /api/departments - Thêm mới
     @PostMapping
     public ResponseEntity<DepartmentDto> createDepartment(@Valid @RequestBody DepartmentDto dto) {
         DepartmentDto created = departmentService.saveOrUpdate(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    // PUT /api/departments/{id} - Update department
+    // PUT /api/departments/{id} - Cập nhật
     @PutMapping("/{id}")
     public ResponseEntity<DepartmentDto> updateDepartment(
             @PathVariable UUID id,
@@ -73,7 +116,7 @@ public class DepartmentController {
         return ResponseEntity.ok(updated);
     }
 
-    // DELETE /api/departments/{id} - Soft delete department
+    // DELETE /api/departments/{id} - Xóa (soft delete)
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteDepartment(@PathVariable UUID id) {
         departmentService.deleteById(id);
@@ -82,7 +125,8 @@ public class DepartmentController {
         return ResponseEntity.ok(response);
     }
 
-    // Exception Handlers
+    // ===== EXCEPTION HANDLERS =====
+
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleEntityNotFound(EntityNotFoundException ex) {
         Map<String, String> error = new HashMap<>();

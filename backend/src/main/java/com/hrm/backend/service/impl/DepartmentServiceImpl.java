@@ -1,19 +1,21 @@
 package com.hrm.backend.service.impl;
 
 import com.hrm.backend.dto.DepartmentDto;
+import com.hrm.backend.dto.response.PageResponse;
+import com.hrm.backend.dto.search.SearchDepartmentDto;
 import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.entity.Department;
 import com.hrm.backend.repository.DepartmentRepository;
 import com.hrm.backend.service.DepartmentService;
+import com.hrm.backend.specification.DepartmentSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -22,12 +24,13 @@ import java.util.stream.Collectors;
 @Transactional
 public class DepartmentServiceImpl implements DepartmentService {
 
-    private final DepartmentRepository departmentRepository;
+    @Autowired
+    private DepartmentRepository departmentRepository;
 
     @Autowired
-    public DepartmentServiceImpl(DepartmentRepository departmentRepository) {
-        this.departmentRepository = departmentRepository;
-    }
+    private DepartmentSpecification departmentSpecification;
+
+    // ===== CRUD OPERATIONS =====
 
     @Override
     public DepartmentDto saveOrUpdate(DepartmentDto dto) {
@@ -120,31 +123,41 @@ public class DepartmentServiceImpl implements DepartmentService {
         departmentRepository.save(department);
     }
 
+    // ===== SEARCH WITH SPECIFICATION =====
+
     @Override
     @Transactional(readOnly = true)
-    public Page<DepartmentDto> searchByKeyword(SearchDto searchDto) {
-        int page = searchDto.getPageIndex() != null ? searchDto.getPageIndex() : 0;
-        int size = searchDto.getPageSize() != null ? searchDto.getPageSize() : 10;
-
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Department> result;
-
-        if (searchDto.getParentId() != null) {
-            // Get sub-departments of a parent
-            result = departmentRepository.findByParentIdAndVoidedFalse(searchDto.getParentId(), pageable);
-        } else if (searchDto.getKeyword() != null && !searchDto.getKeyword().trim().isEmpty()) {
-            // Search by keyword
-            result = departmentRepository.searchByKeyword(searchDto.getKeyword().trim(), pageable);
-        } else {
-            // Get root departments (no parent) - for tree structure
-            result = departmentRepository.findByParentIsNullAndVoidedFalse(pageable);
+    public PageResponse<DepartmentDto> searchDepartments(SearchDepartmentDto dto) {
+        if (dto == null) {
+            dto = new SearchDepartmentDto();
         }
 
-        // Convert to DTOs with subRows
-        return result.map(dept -> new DepartmentDto(dept, false, true, false));
+        // Tạo Specification từ DTO
+        Specification<Department> spec = departmentSpecification.getSpecification(dto);
+
+        // Tạo Pageable với sort
+        Pageable pageable = departmentSpecification.getPageable(dto);
+
+        // Query database - PAGINATION XỬ LÝ Ở DATABASE LEVEL
+        Page<Department> page = departmentRepository.findAll(spec, pageable);
+
+        // Map Entity sang DTO
+        Page<DepartmentDto> dtoPage = page.map(dept -> new DepartmentDto(dept, false, true, false));
+
+        return PageResponse.of(dtoPage);
     }
 
-    // Additional helper methods
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<DepartmentDto> pagingDepartments(SearchDto dto) {
+        // Convert SearchDto sang SearchDepartmentDto (backward compatible)
+        SearchDepartmentDto searchDto = SearchDepartmentDto.fromSearchDto(dto);
+        return searchDepartments(searchDto);
+    }
+
+    // ===== HELPER METHODS =====
+
+    @Override
     @Transactional(readOnly = true)
     public List<DepartmentDto> getAllDepartments() {
         return departmentRepository.findByVoidedFalseOrderByNameAsc()
@@ -153,6 +166,7 @@ public class DepartmentServiceImpl implements DepartmentService {
                 .collect(Collectors.toList());
     }
 
+    @Override
     @Transactional(readOnly = true)
     public List<DepartmentDto> getDepartmentTree() {
         List<Department> rootDepartments = departmentRepository.findByParentIsNullAndVoidedFalseOrderByNameAsc();
