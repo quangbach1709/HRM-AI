@@ -1,6 +1,5 @@
 package com.hrm.backend.dto;
 
-
 import com.hrm.backend.entity.Department;
 import com.hrm.backend.entity.Position;
 
