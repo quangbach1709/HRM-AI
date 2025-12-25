@@ -7,6 +7,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "tbl_staff")
+@PrimaryKeyJoinColumn(name = "id")
 public class Staff extends Person {
 
     @Column(name = "staff_code", unique = true)

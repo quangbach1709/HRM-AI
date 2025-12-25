@@ -131,6 +131,8 @@ public class CertificateServiceImpl implements CertificateService {
     private void mapDtoToEntity(CertificateDto dto, Certificate entity) {
         if (StringUtils.hasText(dto.getCode())) {
             entity.setCode(dto.getCode().trim());
+        } else {
+            entity.setCode("CERT-" + new Date().getTime());
         }
         if (StringUtils.hasText(dto.getName())) {
             entity.setName(dto.getName().trim());
@@ -141,6 +143,10 @@ public class CertificateServiceImpl implements CertificateService {
 
         if (dto.getPerson() != null && dto.getPerson().getId() != null) {
             Person person = personRepository.findById(dto.getPerson().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Person not found"));
+            entity.setPerson(person);
+        } else if (dto.getPersonId() != null) {
+            Person person = personRepository.findById(dto.getPersonId())
                     .orElseThrow(() -> new EntityNotFoundException("Person not found"));
             entity.setPerson(person);
         }
