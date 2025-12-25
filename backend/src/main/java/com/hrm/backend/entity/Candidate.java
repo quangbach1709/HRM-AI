@@ -9,6 +9,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "tbl_candidate")
+@PrimaryKeyJoinColumn(name = "id")
 public class Candidate extends Person {
     @Column(name = "candidate_code", unique = true)
     private String candidateCode; // ma ung vien
@@ -43,7 +44,7 @@ public class Candidate extends Person {
     @Column(name = "candidate_status")
     private Integer candidateStatus; //Xem status: DatnConstants.CandidateStatus
 
-    @Column(name = "work_experience", columnDefinition = "MEDIUMTEXT")
+    @Column(name = "work_experience", columnDefinition = "TEXT")
     private String workExperience; // kinh nghiem của ứng viên
 
     @ManyToOne(fetch = FetchType.LAZY)

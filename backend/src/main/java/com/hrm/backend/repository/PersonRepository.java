@@ -2,8 +2,11 @@ package com.hrm.backend.repository;
 
 import com.hrm.backend.entity.Person;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 
-public interface PersonRepository extends JpaRepository<Person, UUID> {
+@Repository
+public interface PersonRepository extends JpaRepository<Person, UUID>, JpaSpecificationExecutor<Person> {
 }
