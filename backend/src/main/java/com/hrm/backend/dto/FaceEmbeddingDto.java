@@ -5,7 +5,7 @@ import com.hrm.backend.entity.FaceEmbedding;
 public class FaceEmbeddingDto extends AuditableDto{
     private PersonDto person;
     private double[] embeddingVector;
-    private String imageUrl;
+    private FileDescriptionDto imageUrl;
     private boolean isActive = true;
     private String modelVersion;
 
@@ -17,7 +17,7 @@ public class FaceEmbeddingDto extends AuditableDto{
         super(entity);
         this.person = new PersonDto(entity.getPerson(), false);
         this.embeddingVector = entity.getEmbeddingVector();
-        this.imageUrl = entity.getImageUrl();
+        this.imageUrl = new FileDescriptionDto(entity.getImageUrl());
         this.isActive = entity.isActive();
         this.modelVersion = entity.getModelVersion();
     }
@@ -39,11 +39,11 @@ public class FaceEmbeddingDto extends AuditableDto{
         this.embeddingVector = embeddingVector;
     }
 
-    public String getImageUrl() {
+    public FileDescriptionDto getImageUrl() {
         return imageUrl;
     }
 
-    public void setImageUrl(String imageUrl) {
+    public void setImageUrl(FileDescriptionDto imageUrl) {
         this.imageUrl = imageUrl;
     }
 
