@@ -27,14 +27,21 @@ import java.util.stream.Collectors;
 @Transactional
 public class PositionServiceImpl implements PositionService {
 
-    @Autowired
-    private PositionRepository positionRepository;
+   
+    private final PositionRepository positionRepository;
+
+   
+    private final DepartmentRepository departmentRepository;
+
+   
+    private final PositionSpecification positionSpecification;
 
     @Autowired
-    private DepartmentRepository departmentRepository;
-
-    @Autowired
-    private PositionSpecification positionSpecification;
+    public PositionServiceImpl(PositionRepository positionRepository, DepartmentRepository departmentRepository, PositionSpecification positionSpecification) {
+        this.positionRepository = positionRepository;
+        this.departmentRepository = departmentRepository;
+        this.positionSpecification = positionSpecification;
+    }
 
     @Override
     public PositionDto saveOrUpdate(PositionDto dto) {

@@ -19,8 +19,9 @@ public class FaceEmbedding extends AuditableEntity{
     private double[] embeddingVector;
 
     // Đường dẫn ảnh gốc lúc đăng ký (để audit/kiểm tra lại nếu cần)
-    @Column(name = "image_url")
-    private String imageUrl;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "image_url_id")
+    private FileDescription imageUrl;
 
     // Trạng thái (Ví dụ: true là đang dùng, false là khuôn mặt cũ đã xóa)
     @Column(name = "is_active")
@@ -46,11 +47,11 @@ public class FaceEmbedding extends AuditableEntity{
         this.embeddingVector = embeddingVector;
     }
 
-    public String getImageUrl() {
+    public FileDescription getImageUrl() {
         return imageUrl;
     }
 
-    public void setImageUrl(String imageUrl) {
+    public void setImageUrl(FileDescription imageUrl) {
         this.imageUrl = imageUrl;
     }
 

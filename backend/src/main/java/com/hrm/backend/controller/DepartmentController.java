@@ -12,10 +12,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.hrm.backend.utils.HRConstants;
+import org.springframework.security.access.annotation.Secured;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 
 @RestController
 @RequestMapping("/api/departments")
@@ -29,6 +33,7 @@ public class DepartmentController {
      * API phân trang MỚI - Hỗ trợ đầy đủ filter và sort động
      * POST /api/departments/search
      */
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
     @PostMapping("/search")
     public ResponseEntity<PageResponse<DepartmentDto>> searchDepartments(
             @RequestBody SearchDepartmentDto dto) {
@@ -40,6 +45,7 @@ public class DepartmentController {
      * API phân trang CŨ - BACKWARD COMPATIBLE
      * POST /api/departments/paging
      */
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
     @PostMapping("/paging")
     public ResponseEntity<PageResponse<DepartmentDto>> pagingDepartments(
             @RequestBody SearchDto dto) {
@@ -52,6 +58,7 @@ public class DepartmentController {
      * GET
      * /api/departments?pageIndex=0&pageSize=10&keyword=abc&sortBy=name&sortDirection=ASC
      */
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
     @GetMapping
     public ResponseEntity<PageResponse<DepartmentDto>> getDepartments(
             @RequestParam(defaultValue = "0") Integer pageIndex,
@@ -79,6 +86,7 @@ public class DepartmentController {
     }
 
     // GET /api/departments/all - Lấy tất cả (cho dropdown, select)
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
     @GetMapping("/all")
     public ResponseEntity<List<DepartmentDto>> getAllDepartments() {
         List<DepartmentDto> departments = departmentService.getAllDepartments();
@@ -86,6 +94,7 @@ public class DepartmentController {
     }
 
     // GET /api/departments/tree - Lấy dạng cây
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
     @GetMapping("/tree")
     public ResponseEntity<List<DepartmentDto>> getDepartmentTree() {
         List<DepartmentDto> tree = departmentService.getDepartmentTree();
@@ -93,6 +102,7 @@ public class DepartmentController {
     }
 
     // GET /api/departments/{id} - Lấy theo ID
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
     @GetMapping("/{id}")
     public ResponseEntity<DepartmentDto> getDepartmentById(@PathVariable UUID id) {
         DepartmentDto department = departmentService.getById(id);
@@ -100,6 +110,7 @@ public class DepartmentController {
     }
 
     // POST /api/departments - Thêm mới
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR })
     @PostMapping
     public ResponseEntity<DepartmentDto> createDepartment(@Valid @RequestBody DepartmentDto dto) {
         DepartmentDto created = departmentService.saveOrUpdate(dto);
@@ -107,6 +118,7 @@ public class DepartmentController {
     }
 
     // PUT /api/departments/{id} - Cập nhật
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR })
     @PutMapping("/{id}")
     public ResponseEntity<DepartmentDto> updateDepartment(
             @PathVariable UUID id,
@@ -117,6 +129,7 @@ public class DepartmentController {
     }
 
     // DELETE /api/departments/{id} - Xóa (soft delete)
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN })
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteDepartment(@PathVariable UUID id) {
         departmentService.deleteById(id);

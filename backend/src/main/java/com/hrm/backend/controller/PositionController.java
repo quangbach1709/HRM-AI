@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.hrm.backend.utils.HRConstants;
+import org.springframework.security.access.annotation.Secured;
+
 @RestController
 @RequestMapping("/api/positions")
 @CrossOrigin(origins = { "http://localhost:5173", "http://localhost:3000" })
@@ -29,6 +32,7 @@ public class PositionController {
      * API phân trang MỚI - Hỗ trợ đầy đủ filter và sort động
      * POST /api/positions/search
      */
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
     @PostMapping("/search")
     public ResponseEntity<PageResponse<PositionDto>> searchPositions(
             @RequestBody SearchPositionDto dto) {
@@ -40,6 +44,7 @@ public class PositionController {
      * API phân trang CŨ - BACKWARD COMPATIBLE
      * POST /api/positions/paging
      */
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
     @PostMapping("/paging")
     public ResponseEntity<PageResponse<PositionDto>> pagingPositions(
             @RequestBody SearchDto dto) {
@@ -51,6 +56,7 @@ public class PositionController {
      * API GET với query params
      * GET /api/positions
      */
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
     @GetMapping
     public ResponseEntity<PageResponse<PositionDto>> getPositions(
             @RequestParam(defaultValue = "0") Integer pageIndex,
@@ -78,6 +84,7 @@ public class PositionController {
     }
 
     // GET /api/positions/all - Lấy tất cả
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
     @GetMapping("/all")
     public ResponseEntity<List<PositionDto>> getAllPositions() {
         List<PositionDto> positions = positionService.getAllPositions();
@@ -85,12 +92,14 @@ public class PositionController {
     }
 
     // GET /api/positions/department/{departmentId}
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
     @GetMapping("/department/{departmentId}")
     public ResponseEntity<List<PositionDto>> getPositionsByDepartment(@PathVariable UUID departmentId) {
         return ResponseEntity.ok(positionService.getPositionsByDepartment(departmentId));
     }
 
     // GET /api/positions/{id}
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
     @GetMapping("/{id}")
     public ResponseEntity<PositionDto> getById(@PathVariable UUID id) {
         PositionDto position = positionService.getById(id);
@@ -98,6 +107,7 @@ public class PositionController {
     }
 
     // POST /api/positions
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR })
     @PostMapping
     public ResponseEntity<PositionDto> create(@Valid @RequestBody PositionDto dto) {
         PositionDto created = positionService.saveOrUpdate(dto);
@@ -105,6 +115,7 @@ public class PositionController {
     }
 
     // PUT /api/positions/{id}
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR })
     @PutMapping("/{id}")
     public ResponseEntity<PositionDto> update(
             @PathVariable UUID id,
@@ -115,6 +126,7 @@ public class PositionController {
     }
 
     // DELETE /api/positions/{id}
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN })
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> delete(@PathVariable UUID id) {
         positionService.deleteById(id);
