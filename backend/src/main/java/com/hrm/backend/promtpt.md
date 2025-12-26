@@ -1574,3 +1574,557 @@ export function {EntityName}Management() {
 
 ---
 
+# Yêu Cầu Hoàn Thiện Giao Diện Hệ Thống Quản Lý Nhân Sự
+
+## Ngữ Cảnh Dự Án
+
+Tôi đang xây dựng một hệ thống quản lý nhân sự (HRM) với các màn hình đã có sẵn.  Tôi cần bạn hoàn thiện các màn hình còn thiếu và tạo đầy đủ các popup CRUD cho từng bảng dữ liệu.
+
+## Các Màn Hình Đã Có (KHÔNG tạo lại)
+
+Vui lòng kiểm tra và **KHÔNG tạo lại** các màn hình sau vì chúng đã tồn tại:
+
+- AdminDashboard
+
+- UserManagement
+
+- EmployeeDashboard
+
+- MyProfile
+
+- MySalary
+
+- MySchedule
+
+- HRDashboard
+
+- Recruitment
+
+- StaffManagement
+
+- Timekeeping
+
+- WorkShifts
+
+- DepartmentManagement
+
+- PositionManagement
+
+- ManagerDashboard
+
+- SalaryPeriods
+
+- SalaryTables
+
+- SalaryTemplates
+
+## Màn Hình Tham Chiếu
+
+Hai màn hình **DepartmentManagement** và **PositionManagement** đã được hoàn thiện tốt.  Hãy sử dụng chúng làm mẫu tham khảo về:
+
+- Cấu trúc layout
+
+- Thiết kế bảng dữ liệu (DataTable)
+
+- Thiết kế popup CRUD (Create, Read, Update, Delete)
+
+- Cách xử lý form validation
+
+- Style và UI components
+
+## Yêu Cầu Chung
+
+1. **Ngôn ngữ hiển thị**: Tất cả giao diện phải bằng **TIẾNG VIỆT**
+
+2. **Kiểm tra trùng lặp**: Trước khi tạo bất kỳ màn hình nào, kiểm tra xem nó đã tồn tại trong dự án chưa
+
+3. **Nhất quán UI**: Giữ phong cách thiết kế đồng nhất với DepartmentManagement và PositionManagement
+
+## Các Collection Cần Tạo/Hoàn Thiện Giao Diện
+
+### 1. Role (Quản lý Vai trò)
+
+**Màn hình**: RoleManagement
+
+**Các trường**:
+
+| Trường | Mô tả | Kiểu dữ liệu |
+
+|--------|-------|--------------|
+
+| name | Tên vai trò trong hệ thống | String |
+
+| description | Mô tả chi tiết chức năng, phạm vi quyền hạn | String |
+
+**Popup CRUD cần có**:
+
+- Form thêm mới vai trò
+
+- Form chỉnh sửa vai trò
+
+- Dialog xác nhận xóa vai trò
+
+---
+
+### 2. User (Quản lý Tài khoản)
+
+**Màn hình**:  Kiểm tra UserManagement đã có, nếu chưa đầy đủ thì bổ sung
+
+**Các trường**:
+
+| Trường | Mô tả | Kiểu dữ liệu |
+
+|--------|-------|--------------|
+
+| username | Tên đăng nhập | String |
+
+| password | Mật khẩu đăng nhập | String |
+
+| personId | Id của người sở hữu tài khoản | String (Reference) |
+
+---
+
+### 3. UserRole (Phân quyền người dùng)
+
+**Màn hình**: UserRoleManagement
+
+**Các trường**:
+
+| Trường | Mô tả | Kiểu dữ liệu |
+
+|--------|-------|--------------|
+
+| userId | Id người sở hữu quyền hạn | String (Reference) |
+
+| roleId | Id của quyền hạn trong hệ thống | String (Reference) |
+
+**Popup CRUD**:  Cho phép gán/bỏ vai trò cho người dùng
+
+---
+
+### 4. FileDescription (Quản lý Tệp tin)
+
+**Màn hình**: FileManagement
+
+**Các trường**:
+
+| Trường | Mô tả | Kiểu dữ liệu |
+
+|--------|-------|--------------|
+
+| contentType | Loại tệp cần lưu trữ | String |
+
+| contentSize | Kích thước của tệp | String |
+
+| name | Tên của tệp cần lưu trữ | String |
+
+| filePath | Đường dẫn của tệp | String |
+
+| extension | Đuôi mở rộng của tệp | String |
+
+---
+
+### 5. Person (Quản lý Thông tin Cá nhân)
+
+**Màn hình**: PersonManagement
+
+**Các trường**:
+
+| Trường | Mô tả | Kiểu dữ liệu |
+
+|--------|-------|--------------|
+
+| firstName | Tên của người dùng | String |
+
+| lastName | Họ của người dùng | String |
+
+| displayName | Tên đầy đủ | String |
+
+| birthdate | Ngày sinh | Date |
+
+| birthplace | Nơi sinh | String |
+
+| gender | Giới tính | Integer (0: Nam, 1: Nữ, 2: Khác) |
+
+| phoneNumber | Số điện thoại | String |
+
+| idNumber | Số CCCD/CMND | String |
+
+| idNumberIssueDate | Ngày hết hạn CCCD/CMND | Date |
+
+| email | Địa chỉ email | String |
+
+| maritalStatus | Trạng thái hôn nhân | Integer (0: Độc thân, 1: Đã kết hôn, 2: Ly hôn) |
+
+| taxCode | Mã số thuế | String |
+
+| avatarId | Thông tin ảnh đại diện | String (Reference) |
+
+**Lưu ý**: Form phải có validation email, số điện thoại, CCCD
+
+---
+
+### 6. Certificate (Quản lý Chứng chỉ)
+
+**Màn hình**: CertificateManagement
+
+**Các trường**:
+
+| Trường | Mô tả | Kiểu dữ liệu |
+
+|--------|-------|--------------|
+
+| code | Mã chứng chỉ | String |
+
+| name | Tên chứng chỉ | String |
+
+| description | Mô tả chứng chỉ | String |
+
+| personId | Id của người sở hữu chứng chỉ | String (Reference) |
+
+| fileId | Id của file lưu trữ thông tin | String (Reference) |
+
+---
+
+### 7. Staff (Bổ sung nếu StaffManagement chưa đủ)
+
+**Kiểm tra StaffManagement và bổ sung các trường**:
+
+| Trường | Mô tả | Kiểu dữ liệu |
+
+|--------|-------|--------------|
+
+| staffCode | Mã của nhân viên | String |
+
+| recruitmentDate | Ngày được tuyển dụng | Date |
+
+| startDate | Ngày bắt đầu chính thức | Date |
+
+| apprenticeDays | Số ngày học việc/thử việc | Integer |
+
+| employeeStatus | Trạng thái làm việc | Integer (0: Đang làm việc, 1: Đã nghỉ việc, 2: Tạm nghỉ) |
+
+| staffPhase | Loại nhân viên | Integer (0: Học việc, 1: Thử việc, 2: Chính thức) |
+
+| requireAttendance | Cần chấm công hay không | Boolean |
+
+| salaryTemplateId | Id mẫu bảng lương | String (Reference) |
+
+---
+
+### 8. RecruitmentRequest (Yêu cầu Tuyển dụng)
+
+**Màn hình**:  RecruitmentRequestManagement
+
+**Các trường**:
+
+| Trường | Mô tả | Kiểu dữ liệu |
+
+|--------|-------|--------------|
+
+| code | Mã yêu cầu | String |
+
+| name | Tên yêu cầu tuyển dụng | String |
+
+| proposerId | Id người đề xuất | String (Reference) |
+
+| proposalDate | Ngày đề xuất | Date |
+
+| request | Yêu cầu công việc | String (TextArea) |
+
+| positionId | Vị trí cần tuyển | String (Reference) |
+
+---
+
+### 9. StaffLabourAgreement (Hợp đồng Lao động)
+
+**Màn hình**: LabourAgreementManagement
+
+**Các trường**:
+
+| Trường | Mô tả | Kiểu dữ liệu |
+
+|--------|-------|--------------|
+
+| staffId | Id nhân viên sở hữu hợp đồng | String (Reference) |
+
+| contractType | Loại hợp đồng | Integer (0: Thử việc, 1: Có thời hạn, 2: Không thời hạn) |
+
+| laborAgreementNumber | Số hợp đồng | Integer |
+
+| startDate | Ngày bắt đầu hợp đồng | Date |
+
+| endDate | Ngày kết thúc hợp đồng | Date |
+
+| durationMonths | Số tháng hợp đồng | Integer |
+
+| workingHour | Số giờ công chuẩn/ngày | Double |
+
+| workingHourWeekMin | Số giờ tối thiểu/tuần | Double |
+
+| salary | Lương ký hợp đồng | Double (Format tiền VNĐ) |
+
+| signedDate | Ngày ký hợp đồng | Date |
+
+| agreementStatus | Trạng thái hợp đồng | Integer (0: Hiệu lực, 1: Hết hạn, 2: Đã hủy) |
+
+---
+
+### 10. StaffWorkSchedule (Lịch làm việc Nhân viên)
+
+**Kiểm tra WorkShifts và bổ sung nếu cần**:
+
+| Trường | Mô tả | Kiểu dữ liệu |
+
+|--------|-------|--------------|
+
+| shiftWorkType | Loại ca làm việc | Integer (0: Ca sáng, 1: Ca chiều, 2: Ca ngày, 3: Ca đêm) |
+
+| staffId | Id nhân viên được phân ca | String (Reference) |
+
+| workingDate | Ngày làm việc | Date |
+
+| checkIn | Giờ check-in | DateTime |
+
+| checkout | Giờ check-out | DateTime |
+
+| shiftWorkStatus | Trạng thái ca làm việc | Integer (0: Khởi tạo, 1: Đã check-in, 2: Thiếu giờ, 3: Hoàn thành) |
+
+| coordinatorId | Id nhân viên phân ca | String (Reference) |
+
+| isLocked | Ca đã bị khóa | Boolean |
+
+---
+
+### 11. SalaryTemplateItem (Thành phần Mẫu Lương)
+
+**Màn hình**:  SalaryTemplateItemManagement (hoặc tích hợp vào SalaryTemplates)
+
+**Các trường**:
+
+| Trường | Mô tả | Kiểu dữ liệu |
+
+|--------|-------|--------------|
+
+| name | Tên thành phần lương | String |
+
+| code | Mã thành phần lương | String |
+
+| displayOrder | Thứ tự hiển thị | Integer |
+
+| salaryTemplateId | Id mẫu bảng lương | String (Reference) |
+
+| salaryItemType | Loại thành phần | Integer (0: Giá trị cố định, 1: Công thức, 2: Hệ thống) |
+
+| defaultAmount | Giá trị mặc định | Double |
+
+| formula | Công thức tính | String |
+
+---
+
+### 12. SalaryResult (Kết quả Bảng lương)
+
+**Màn hình**: SalaryResultManagement
+
+**Các trường**:
+
+| Trường | Mô tả | Kiểu dữ liệu |
+
+|--------|-------|--------------|
+
+| salaryPeriodId | Id của kỳ lương | String (Reference) |
+
+| salaryTemplateId | Id mẫu bảng lương | String (Reference) |
+
+| name | Tên bảng lương | String |
+
+---
+
+### 13. SalaryResultItem (Chi tiết Lương Nhân viên)
+
+**Màn hình**:  Tích hợp vào SalaryResultManagement
+
+**Các trường**:
+
+| Trường | Mô tả | Kiểu dữ liệu |
+
+|--------|-------|--------------|
+
+| salaryResultId | Id kết quả bảng lương | String (Reference) |
+
+| staffId | Id nhân viên | String (Reference) |
+
+---
+
+### 14. SalaryResultItemDetail (Chi tiết Khoản lương)
+
+**Các trường**:
+
+| Trường | Mô tả | Kiểu dữ liệu |
+
+|--------|-------|--------------|
+
+| salaryResultItemId | Id kết quả phần tử lương | String (Reference) |
+
+| salaryTemplateItemId | Id phần tử lương | String (Reference) |
+
+| value | Giá trị khoản lương | Double |
+
+---
+
+### 15.  Candidate (Quản lý Ứng viên)
+
+**Màn hình**: CandidateManagement (kiểm tra Recruitment đã có chưa)
+
+**Các trường**:
+
+| Trường | Mô tả | Kiểu dữ liệu |
+
+|--------|-------|--------------|
+
+| candidateCode | Mã ứng viên | String |
+
+| positionId | Id vị trí ứng tuyển | String (Reference) |
+
+| submissionDate | Ngày nộp hồ sơ | Date |
+
+| interviewDate | Ngày phỏng vấn | Date |
+
+| desiredPay | Mức lương mong muốn | Double |
+
+| possibleWorkingDate | Ngày có thể làm việc | Date |
+
+| onboardDate | Ngày nhận việc | Date |
+
+| introducerId | Id nhân viên giới thiệu | String (Reference) |
+
+| staffId | Id nhân viên (nếu được nhận) | String (Reference) |
+
+| candidateStatus | Trạng thái ứng viên | Integer (0: Khởi tạo, 1: Đã sơ lọc, 2: Qua phỏng vấn, 3: Đã nhận việc, 4: Từ chối) |
+
+| workExperience | Kinh nghiệm làm việc | String (TextArea) |
+
+| recruitmentRequestId | Id yêu cầu tuyển dụng | String (Reference) |
+
+---
+
+### 16. FaceEmbedding (Quản lý Khuôn mặt)
+
+**Màn hình**:  FaceRegistrationManagement
+
+**Các trường**:
+
+| Trường | Mô tả | Kiểu dữ liệu |
+
+|--------|-------|--------------|
+
+| personId | Id người dùng | String (Reference) |
+
+| embeddingVector | Vector khuôn mặt | Array (Chỉ hiển thị, không cho sửa) |
+
+| imageUrl | Đường dẫn ảnh gốc | String (Hiển thị ảnh) |
+
+| isActive | Tình trạng sử dụng | Boolean |
+
+---
+
+## Yêu Cầu Chi Tiết Cho Mỗi Màn Hình
+
+### Cấu trúc DataTable:
+
+- Header với tiêu đề màn hình và nút "Thêm mới"
+
+- Bảng dữ liệu có phân trang
+
+- Thanh tìm kiếm và bộ lọc
+
+- Cột hành động với các nút:  Xem chi tiết, Sửa, Xóa
+
+- Responsive design
+
+### Popup CRUD cần có:
+
+1. **Popup Thêm mới**:
+
+    - Form với tất cả các trường cần thiết
+
+    - Validation cho từng trường
+
+    - Nút Hủy và Lưu
+
+2. **Popup Chỉnh sửa**:
+
+    - Load dữ liệu hiện tại vào form
+
+    - Cho phép sửa các trường cần thiết
+
+    - Nút Hủy và Cập nhật
+
+3. **Popup Xem chi tiết**:
+
+    - Hiển thị thông tin chi tiết
+
+    - Chỉ đọc (read-only)
+
+    - Nút Đóng
+
+4. **Dialog Xác nhận xóa**:
+
+    - Hiển thị cảnh báo
+
+    - Nút Hủy và Xác nhận xóa
+
+### Các trường Audit (tự động thêm vào mỗi form):
+
+- createdAt:  Thời gian tạo (chỉ hiển thị, không sửa)
+
+- updatedAt:  Thời gian cập nhật (chỉ hiển thị, không sửa)
+
+- createdBy:  Người tạo (chỉ hiển thị, không sửa)
+
+- updatedBy:  Người sửa (chỉ hiển thị, không sửa)
+
+## Labels Tiếng Việt Thống Nhất
+
+- Thêm mới → "Thêm mới"
+
+- Chỉnh sửa → "Chỉnh sửa"
+
+- Xóa → "Xóa"
+
+- Tìm kiếm → "Tìm kiếm"
+
+- Lọc → "Lọc"
+
+- Hủy → "Hủy"
+
+- Lưu → "Lưu"
+
+- Cập nhật → "Cập nhật"
+
+- Xác nhận → "Xác nhận"
+
+- Đóng → "Đóng"
+
+- Hành động → "Hành động"
+
+- STT → "STT"
+
+- Trang → "Trang"
+
+- Hiển thị → "Hiển thị"
+
+- bản ghi → "bản ghi"
+
+## Lưu Ý Quan Trọng
+
+1. **KIỂM TRA TRƯỚC KHI TẠO**: Luôn kiểm tra xem màn hình đã tồn tại trong dự án chưa
+
+2. **TIẾNG VIỆT**:  Tất cả text, label, placeholder, message đều bằng tiếng Việt
+
+3. **THAM CHIẾU**:  Dựa vào DepartmentManagement và PositionManagement để đảm bảo nhất quán
+
+4. **VALIDATION**: Thêm validation phù hợp cho từng loại dữ liệu
+
+5. **UX**: Thêm loading state, error handling, success notification
+
