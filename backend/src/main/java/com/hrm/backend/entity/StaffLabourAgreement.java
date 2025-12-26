@@ -38,7 +38,7 @@ public class StaffLabourAgreement extends AuditableEntity {
     private Date signedDate;// Ngày ký
 
     @Column(name = "agreement_status")
-    private Integer agreementStatus; // Trạng thái hợp đồng. Chi tiết DatnConstants.StaffLabourAgreementStatus;
+    private Integer agreementStatus; // Trạng thái hợp đồng. Chi tiết HRConstants.StaffLabourAgreementStatus;
 
     public StaffLabourAgreement() {
     }

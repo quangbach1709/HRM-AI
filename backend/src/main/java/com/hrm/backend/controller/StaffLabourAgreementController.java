@@ -43,14 +43,14 @@ public class StaffLabourAgreementController {
         return ResponseEntity.ok(service.getById(id));
     }
 
-    @Secured({ HRConstants.ROLE_ADMIN, HRConstants.ROLE_MANAGER })
+    @Secured({ HRConstants.ROLE_ADMIN, HRConstants.ROLE_MANAGER , HRConstants.ROLE_HR })
     @PostMapping
     public ResponseEntity<StaffLabourAgreementDto> create(@RequestBody StaffLabourAgreementDto dto) {
         StaffLabourAgreementDto created = service.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @Secured({ HRConstants.ROLE_ADMIN, HRConstants.ROLE_MANAGER })
+    @Secured({ HRConstants.ROLE_ADMIN, HRConstants.ROLE_MANAGER , HRConstants.ROLE_HR })
     @PutMapping("/{id}")
     public ResponseEntity<StaffLabourAgreementDto> update(@PathVariable UUID id,
             @RequestBody StaffLabourAgreementDto dto) {
