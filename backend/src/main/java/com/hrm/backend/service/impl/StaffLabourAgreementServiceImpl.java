@@ -133,6 +133,10 @@ public class StaffLabourAgreementServiceImpl implements StaffLabourAgreementServ
             Staff staff = staffRepository.findById(dto.getStaff().getId())
                     .orElseThrow(() -> new EntityNotFoundException("Staff not found"));
             entity.setStaff(staff);
+        } else if (dto.getStaffId() != null && dto.getStaffId() != null) {
+            Staff staff = staffRepository.findById(dto.getStaffId())
+                    .orElseThrow(() -> new EntityNotFoundException("Staff not found"));
+            entity.setStaff(staff);
         }
 
         entity.setContractType(dto.getContractType());

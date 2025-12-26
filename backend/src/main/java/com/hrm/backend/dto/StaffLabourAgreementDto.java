@@ -5,10 +5,12 @@ import com.hrm.backend.entity.StaffLabourAgreement;
 import jakarta.validation.Valid;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Valid
 public class StaffLabourAgreementDto extends AuditableDto {
     private StaffDto staff;
+    private UUID staffId;
     private Integer contractType; // 1: Thử việc, 2: Chính thức, 3: Thời vụ, 4: Xác định thời hạn, 5: Không xác định thời hạn
     private String labourAgreementNumber; // Số hợp đồng
     private Date startDate; // Ngày bắt đầu hiệu lực hợp đồng
@@ -27,6 +29,7 @@ public class StaffLabourAgreementDto extends AuditableDto {
             if (entity.getStaff() != null) {
                 this.staff = new StaffDto(entity.getStaff(), false);
             }
+            this.staffId = entity.getStaff() != null ? entity.getStaff().getId() : null;
             this.contractType = entity.getContractType();
             this.labourAgreementNumber = entity.getLabourAgreementNumber();
             this.startDate = entity.getStartDate();
@@ -43,6 +46,14 @@ public class StaffLabourAgreementDto extends AuditableDto {
                 // TODO: Bổ sung lấy thêm các thông tin liên quan nếu cần
             }
         }
+    }
+
+    public UUID getStaffId() {
+        return staffId;
+    }
+
+    public void setStaffId(UUID staffId) {
+        this.staffId = staffId;
     }
 
     public StaffDto getStaff() {
