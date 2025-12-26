@@ -11,7 +11,7 @@ import java.util.Set;
 
 @Table(name = "tbl_user")
 @Entity
-public class  User extends AuditableEntity implements UserDetails {
+public class User extends AuditableEntity implements UserDetails {
     private static final long serialVersionUID = 1L;
     @Column(name = "username", unique = true, nullable = false)
     private String username;
@@ -22,9 +22,9 @@ public class  User extends AuditableEntity implements UserDetails {
     @Column(name = "last_login_time")
     private LocalDateTime lastLoginTime;// thời gian đang nhập gần nhất
     @Column(name = "total_login_failures")
-    private Long totalLoginFailures;//tổng số lần đăng nhập thất bại
+    private Long totalLoginFailures;// tổng số lần đăng nhập thất bại
     @Column(name = "last_login_failures")
-    private Long lastLoginFailures; //tổng số lần đăng nhập thất bại liên tiếp
+    private Long lastLoginFailures; // tổng số lần đăng nhập thất bại liên tiếp
     @Column(name = "email", unique = true, nullable = false)
     private String email;
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -32,10 +32,22 @@ public class  User extends AuditableEntity implements UserDetails {
     @OneToOne
     private Person person;
 
-    @Override
+        @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream().map(u -> new SimpleGrantedAuthority(u.getRole().getName())).toList();
+        return roles.stream().map(u -> {
+            String roleName = u.getRole().getName();
+            // Ensure role name has ROLE_ prefix for Spring Security @Secured to work
+            if (!roleName.startsWith("ROLE_")) {
+                roleName = "ROLE_" + roleName;
+            }
+            return new SimpleGrantedAuthority(roleName);
+        }).toList();
     }
+
+//    @Override
+//    public Collection<? extends GrantedAuthority> getAuthorities() {
+//        return roles.stream().map(u -> new SimpleGrantedAuthority(u.getRole().getName())).toList();
+//    }
 
     @Override
     public String getPassword() {
@@ -47,7 +59,7 @@ public class  User extends AuditableEntity implements UserDetails {
         return username;
     }
 
-    //Trong Spring Security, false mới là bị khóa hoặc bị vô hiệu hóa.
+    // Trong Spring Security, false mới là bị khóa hoặc bị vô hiệu hóa.
     @Override
     public boolean isAccountNonExpired() {
         return true;
