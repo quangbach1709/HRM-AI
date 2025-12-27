@@ -1,9 +1,9 @@
 package com.hrm.backend.dto.search;
 
-import com.hrm.backend.dto.search.SearchDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.hrm.backend.dto.search.SearchDto;
 
 import java.util.UUID;
 

@@ -6,7 +6,6 @@ import com.hrm.backend.dto.response.PageResponse;
 import com.hrm.backend.dto.search.SearchSalaryPeriodDto;
 import com.hrm.backend.service.SalaryPeriodService;
 import com.hrm.backend.utils.HRConstants;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +23,7 @@ public class SalaryPeriodController {
 
     private final SalaryPeriodService service;
 
-    @Autowired
+    
     public  SalaryPeriodController(SalaryPeriodService service) {
         this.service = service;
     }

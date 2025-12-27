@@ -1,11 +1,8 @@
 package com.hrm.backend.controller;
 
 import com.hrm.backend.dto.FileDescriptionDto;
-import com.hrm.backend.entity.FileDescription;
 import com.hrm.backend.service.FileDescriptionService;
 import com.hrm.backend.utils.HRConstants;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +17,6 @@ public class FileDescriptionController {
 
     private final FileDescriptionService fileDescriptionService;
 
-    @Autowired
     public FileDescriptionController(FileDescriptionService fileDescriptionService) {
         this.fileDescriptionService = fileDescriptionService;
     }
