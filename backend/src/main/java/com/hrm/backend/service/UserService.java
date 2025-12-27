@@ -1,6 +1,7 @@
 package com.hrm.backend.service;
 
 import com.hrm.backend.dto.UserDto;
+import com.hrm.backend.entity.User;
 import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.dto.response.PageResponse;
 import com.hrm.backend.dto.search.SearchUserDto;
@@ -24,4 +25,8 @@ public interface UserService {
     List<UserDto> getAll();
 
     List<UserDto> exportToExcel(SearchUserDto dto);
+
+    UserDto getCurrentUser();
+
+    User getCurrentUserEntity();
 }

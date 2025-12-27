@@ -4,6 +4,7 @@ import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.dto.StaffDto;
 import com.hrm.backend.dto.response.PageResponse;
 import com.hrm.backend.dto.search.SearchStaffDto;
+import com.hrm.backend.entity.Staff;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,4 +25,10 @@ public interface StaffService {
     List<StaffDto> getAll();
 
     List<StaffDto> exportToExcel(SearchStaffDto dto);
+
+    StaffDto getCurrentStaff();
+
+    Staff getCurrentStaffEntity();
+
+    String generateStaffCode();
 }
