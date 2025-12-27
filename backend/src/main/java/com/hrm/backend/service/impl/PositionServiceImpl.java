@@ -27,17 +27,15 @@ import java.util.stream.Collectors;
 @Transactional
 public class PositionServiceImpl implements PositionService {
 
-   
     private final PositionRepository positionRepository;
 
-   
     private final DepartmentRepository departmentRepository;
 
-   
     private final PositionSpecification positionSpecification;
 
     @Autowired
-    public PositionServiceImpl(PositionRepository positionRepository, DepartmentRepository departmentRepository, PositionSpecification positionSpecification) {
+    public PositionServiceImpl(PositionRepository positionRepository, DepartmentRepository departmentRepository,
+            PositionSpecification positionSpecification) {
         this.positionRepository = positionRepository;
         this.departmentRepository = departmentRepository;
         this.positionSpecification = positionSpecification;
@@ -74,9 +72,10 @@ public class PositionServiceImpl implements PositionService {
         entity.setName(dto.getName());
         entity.setIsMain(dto.getIsMain());
 
-        if (dto.getDepartment().getId() != null || dto.getDepartment() != null) {
+        if (dto.getDepartment() != null && dto.getDepartment().getId() != null) {
             Department department = departmentRepository.findById(dto.getDepartment().getId())
-                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy phòng ban với ID: " + dto.getDepartment().getId()));
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Không tìm thấy phòng ban với ID: " + dto.getDepartment().getId()));
             entity.setDepartment(department);
         } else {
             entity.setDepartment(null);
@@ -85,7 +84,6 @@ public class PositionServiceImpl implements PositionService {
         if (dto.getStaff() != null) {
             // Staff assignment logic can be added here if needed
         }
-
 
         Position savedEntity = positionRepository.save(entity);
         return new PositionDto(savedEntity, true, true);
