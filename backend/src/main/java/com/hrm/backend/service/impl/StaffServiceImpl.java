@@ -6,9 +6,11 @@ import com.hrm.backend.dto.response.PageResponse;
 import com.hrm.backend.dto.search.SearchStaffDto;
 import com.hrm.backend.entity.SalaryTemplate;
 import com.hrm.backend.entity.Staff;
+import com.hrm.backend.entity.User;
 import com.hrm.backend.repository.SalaryTemplateRepository;
 import com.hrm.backend.repository.StaffRepository;
 import com.hrm.backend.service.StaffService;
+import com.hrm.backend.service.UserService;
 import com.hrm.backend.specification.StaffSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,9 +22,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import jakarta.persistence.EntityNotFoundException;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -34,6 +39,7 @@ public class StaffServiceImpl implements StaffService {
     private final StaffRepository repository;
     private final StaffSpecification specification;
     private final SalaryTemplateRepository salaryTemplateRepository;
+    private final UserService userService;
 
     @Override
     public PageResponse<StaffDto> search(SearchStaffDto dto) {
@@ -123,6 +129,55 @@ public class StaffServiceImpl implements StaffService {
         return repository.findAll(spec, sort).stream()
                 .map(entity -> new StaffDto(entity, false))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public StaffDto getCurrentStaff() {
+        User currentUser = userService.getCurrentUserEntity(); // Lấy user hiện tại
+        if (currentUser != null && currentUser.getId() != null) {
+            // Giả sử bạn có một phương thức để tìm staff dựa trên userId
+            Staff staff = repository.findByUserId(currentUser.getId());
+            return new StaffDto(staff, true);
+        }
+        return null;
+    }
+
+    @Override
+    public Staff getCurrentStaffEntity() {
+        User currentUser = userService.getCurrentUserEntity(); // Lấy user hiện tại
+        if (currentUser != null && currentUser.getId() != null) {
+            // Giả sử bạn có một phương thức để tìm staff dựa trên userId
+            return repository.findByUserId(currentUser.getId());
+        }
+        return null;
+    }
+
+    @Override
+    public String generateStaffCode() {
+        LocalDate now = LocalDate.now();
+        String year = String.format("%02d", now.getYear() % 100);
+        String month = String.format("%02d", now.getMonthValue());
+
+        String prefix = "NV" + year + month;
+
+        // Lấy tất cả mã nhân viên bắt đầu với prefix
+        List<String> existingCodes = repository.findStaffCodesStartingWith(prefix);
+
+        Set<Integer> existingNumbers = existingCodes.stream()
+                .map(code -> code.substring(prefix.length()))
+                .filter(suffix -> suffix.matches("\\d+"))
+                .map(Integer::parseInt)
+                .collect(Collectors.toSet());
+
+        int max = existingNumbers.stream().max(Integer::compareTo).orElse(0);
+        int nextNumber = max + 1;
+
+        while (existingNumbers.contains(nextNumber)) {
+            nextNumber++;
+        }
+
+        String sequence = String.format("%04d", nextNumber);
+        return prefix + sequence;
     }
 
     private void validateForCreate(StaffDto dto) {

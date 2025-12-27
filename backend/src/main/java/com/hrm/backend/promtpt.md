@@ -1884,7 +1884,7 @@ Hai màn hình **DepartmentManagement** và **PositionManagement** đã được
 
 | workingDate | Ngày làm việc | Date |
 
-| checkIn | Giờ check-in | DateTime |
+| checkIn | Ngày bắt đầu hợp đồng | DateTime |
 
 | checkout | Giờ check-out | DateTime |
 

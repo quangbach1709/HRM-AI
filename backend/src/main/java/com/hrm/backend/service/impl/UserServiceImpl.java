@@ -18,6 +18,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -131,6 +133,25 @@ public class UserServiceImpl implements UserService {
         return repository.findAll(spec, sort).stream()
                 .map(UserDto::new)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public UserDto getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof User) {
+            User result = (User) authentication.getPrincipal();
+            return new UserDto(result);
+        }
+        throw new SecurityException("Bạn chưa đăng nhập");
+    }
+
+    @Override
+    public User getCurrentUserEntity() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof User) {
+            return (User) authentication.getPrincipal();
+        }
+        throw new SecurityException("Bạn chưa đăng nhập");
     }
 
     private void mapDtoToEntity(UserDto dto, User entity) {

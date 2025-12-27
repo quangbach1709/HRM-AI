@@ -4,10 +4,12 @@ package com.hrm.backend.dto;
 import com.hrm.backend.entity.StaffWorkSchedule;
 
 import java.util.Date;
+import java.util.UUID;
 
 public class StaffWorkScheduleDto extends AuditableDto {
     private Integer shiftWorkType; // Loại ca làm việc. Chi tiết: DatnConstants.ShiftWorkType
     private StaffDto staff; // Nhân viên được phân ca làm việc
+    private UUID staffId;
     private Date workingDate; //Ngày làm việc
     private Date checkIn; // Thời gian bắt đầu làm việc
     private Date checkOut; // Thời gian kết thúc làm việc
@@ -27,6 +29,7 @@ public class StaffWorkScheduleDto extends AuditableDto {
                 this.staff.setId(entity.getStaff().getId());
                 this.staff.setStaffCode(entity.getStaff().getStaffCode());
                 this.staff.setDisplayName(entity.getStaff().getDisplayName());
+                this.staffId = entity.getStaff().getId();
             }
             this.workingDate = entity.getWorkingDate();
             this.checkIn = entity.getCheckIn();
@@ -107,5 +110,13 @@ public class StaffWorkScheduleDto extends AuditableDto {
 
     public void setLocked(Boolean locked) {
         isLocked = locked;
+    }
+
+    public UUID getStaffId() {
+        return staffId;
+    }
+
+    public void setStaffId(UUID staffId) {
+        this.staffId = staffId;
     }
 }
