@@ -17,12 +17,12 @@ public class RecruitmentRequest extends BaseObject {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "position_id")
-    private Position position; //Vị trí cần tuyển
+    private Position position; // Vị trí cần tuyển
 
-    //Mô tả, yêu cầu công việc
-    @Column(name = "description", columnDefinition = "MEDIUMTEXT")
+    // Mô tả, yêu cầu công việc
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description; // mo ta cong viec
-    @Column(name = "request", columnDefinition = "MEDIUMTEXT")
+    @Column(name = "request", columnDefinition = "TEXT")
     private String request; // yeu cau
 
     public RecruitmentRequest() {
