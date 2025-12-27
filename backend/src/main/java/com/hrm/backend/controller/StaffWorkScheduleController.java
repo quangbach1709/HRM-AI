@@ -7,7 +7,6 @@ import com.hrm.backend.dto.search.SearchStaffWorkScheduleDto;
 import com.hrm.backend.service.StaffWorkScheduleService;
 import com.hrm.backend.utils.HRConstants;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;

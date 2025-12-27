@@ -5,7 +5,6 @@ import com.hrm.backend.entity.User;
 import com.hrm.backend.entity.UserRole;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -23,7 +22,7 @@ public class DataLoader implements CommandLineRunner {
 
     private final PasswordEncoder passwordEncoder;
 
-    @Autowired
+
     public DataLoader(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }

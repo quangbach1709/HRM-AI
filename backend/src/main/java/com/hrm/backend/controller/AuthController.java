@@ -5,7 +5,6 @@ import com.hrm.backend.dto.auth.LoginRequest;
 import com.hrm.backend.entity.User;
 import com.hrm.backend.security.JwtService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,7 +22,6 @@ public class AuthController {
         private final AuthenticationManager authenticationManager;
         private final JwtService jwtService;
 
-        @Autowired
         public AuthController(AuthenticationManager authenticationManager, JwtService jwtService) {
                 this.authenticationManager = authenticationManager;
                 this.jwtService = jwtService;
