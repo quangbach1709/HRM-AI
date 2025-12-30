@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import jakarta.persistence.EntityNotFoundException;
+
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -45,11 +46,6 @@ public class SalaryTemplateServiceImpl implements SalaryTemplateService {
         return PageResponse.of(dtoPage);
     }
 
-    @Override
-    public PageResponse<SalaryTemplateDto> paging(SearchDto dto) {
-        SearchSalaryTemplateDto searchDto = SearchSalaryTemplateDto.fromSearchDto(dto);
-        return search(searchDto);
-    }
 
     // ==================== GET ====================
 
@@ -75,9 +71,11 @@ public class SalaryTemplateServiceImpl implements SalaryTemplateService {
     public SalaryTemplateDto create(SalaryTemplateDto dto) {
         validateForCreate(dto);
 
-        SalaryTemplate entity = new SalaryTemplate();
-        mapDtoToEntity(dto, entity);
+        if (!StringUtils.hasText(dto.getCode())) {
+            dto.setCode("SAL-" + System.currentTimeMillis());
+        }
 
+        SalaryTemplate entity = SalaryTemplateDto.toEntity(dto);
         entity.setCreatedAt(LocalDateTime.now());
         entity.setVoided(false);
 
@@ -94,11 +92,8 @@ public class SalaryTemplateServiceImpl implements SalaryTemplateService {
                 .orElseThrow(() -> new EntityNotFoundException("SalaryTemplate not found: " + id));
 
         validateForUpdate(dto, entity);
-
-        mapDtoToEntity(dto, entity);
-
+        entity = SalaryTemplateDto.toEntity(dto);
         entity.setUpdatedAt(LocalDateTime.now());
-
         entity = repository.save(entity);
         return new SalaryTemplateDto(entity, false);
     }
@@ -132,19 +127,6 @@ public class SalaryTemplateServiceImpl implements SalaryTemplateService {
                 .collect(Collectors.toList());
     }
 
-    // ==================== PRIVATE HELPER METHODS ====================
-
-    private void mapDtoToEntity(SalaryTemplateDto dto, SalaryTemplate entity) {
-        if (StringUtils.hasText(dto.getCode())) {
-            entity.setCode(dto.getCode().trim());
-        }
-        if (StringUtils.hasText(dto.getName())) {
-            entity.setName(dto.getName().trim());
-        }
-        if (dto.getDescription() != null) {
-            entity.setDescription(dto.getDescription());
-        }
-    }
 
     private void validateForCreate(SalaryTemplateDto dto) {
         if (!StringUtils.hasText(dto.getCode())) {
