@@ -13,8 +13,6 @@ public interface SalaryPeriodService {
     // ===== PAGINATION =====
     PageResponse<SalaryPeriodDto> search(SearchSalaryPeriodDto dto);
 
-    PageResponse<SalaryPeriodDto> paging(SearchDto dto);
-
     // ===== CRUD =====
     SalaryPeriodDto getById(UUID id);
 

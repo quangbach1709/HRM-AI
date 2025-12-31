@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import jakarta.persistence.EntityNotFoundException;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -47,11 +48,6 @@ public class SalaryPeriodServiceImpl implements SalaryPeriodService {
         return PageResponse.of(dtoPage);
     }
 
-    @Override
-    public PageResponse<SalaryPeriodDto> paging(SearchDto dto) {
-        SearchSalaryPeriodDto searchDto = SearchSalaryPeriodDto.fromSearchDto(dto);
-        return search(searchDto);
-    }
 
     // ==================== GET ====================
 
@@ -77,8 +73,7 @@ public class SalaryPeriodServiceImpl implements SalaryPeriodService {
     public SalaryPeriodDto create(SalaryPeriodDto dto) {
         validateForCreate(dto);
 
-        SalaryPeriod entity = new SalaryPeriod();
-        mapDtoToEntity(dto, entity);
+        SalaryPeriod entity = SalaryPeriodDto.toEntity(dto);
 
         entity.setCreatedAt(LocalDateTime.now());
         entity.setVoided(false);
@@ -99,8 +94,8 @@ public class SalaryPeriodServiceImpl implements SalaryPeriodService {
                 .orElseThrow(() -> new EntityNotFoundException("SalaryPeriod not found: " + id));
 
         validateForUpdate(dto, entity);
-
-        mapDtoToEntity(dto, entity);
+        dto.setId(id);
+        entity = SalaryPeriodDto.toEntity(dto);
 
         entity.setUpdatedAt(LocalDateTime.now());
 
@@ -135,26 +130,6 @@ public class SalaryPeriodServiceImpl implements SalaryPeriodService {
         return repository.findAll(spec, sort).stream()
                 .map(SalaryPeriodDto::new)
                 .collect(Collectors.toList());
-    }
-
-    // ==================== PRIVATE HELPER METHODS ====================
-
-    private void mapDtoToEntity(SalaryPeriodDto dto, SalaryPeriod entity) {
-        if (StringUtils.hasText(dto.getCode()))
-            entity.setCode(dto.getCode().trim());
-        if (StringUtils.hasText(dto.getName()))
-            entity.setName(dto.getName().trim());
-        if (dto.getDescription() != null)
-            entity.setDescription(dto.getDescription());
-
-        if (dto.getStartDate() != null)
-            entity.setStartDate(dto.getStartDate());
-        if (dto.getEndDate() != null)
-            entity.setEndDate(dto.getEndDate());
-        if (dto.getSalaryPeriodStatus() != null)
-            entity.setSalaryPeriodStatus(dto.getSalaryPeriodStatus());
-        if (dto.getEstimatedWorkingDays() != null)
-            entity.setEstimatedWorkingDays(dto.getEstimatedWorkingDays());
     }
 
     private void validateForCreate(SalaryPeriodDto dto) {
