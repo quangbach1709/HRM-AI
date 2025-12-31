@@ -32,12 +32,6 @@ public class SalaryTemplateItemController {
     }
 
     @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR })
-    @PostMapping("/paging")
-    public ResponseEntity<PageResponse<SalaryTemplateItemDto>> paging(@RequestBody SearchDto dto) {
-        return ResponseEntity.ok(service.paging(dto));
-    }
-
-    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR })
     @GetMapping
     public ResponseEntity<PageResponse<SalaryTemplateItemDto>> getAll(
             @RequestParam(defaultValue = "0") Integer pageIndex,

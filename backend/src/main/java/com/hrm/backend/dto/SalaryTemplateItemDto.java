@@ -1,10 +1,13 @@
 package com.hrm.backend.dto;
 
 
+import com.hrm.backend.entity.SalaryTemplate;
 import com.hrm.backend.entity.SalaryTemplateItem;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.util.StringUtils;
 
 @Valid
 public class SalaryTemplateItemDto extends AuditableDto {
@@ -40,6 +43,30 @@ public class SalaryTemplateItemDto extends AuditableDto {
         }
     }
 
+
+    public static SalaryTemplateItem toEntity(SalaryTemplateItemDto dto){
+        SalaryTemplateItem entity = new SalaryTemplateItem();
+        if(dto.getId() != null){
+            entity.setId(dto.getId());
+        }
+        if (StringUtils.hasText(dto.getCode()))
+            entity.setCode(dto.getCode().trim());
+        if (StringUtils.hasText(dto.getName()))
+            entity.setName(dto.getName().trim());
+        if (dto.getDisplayOrder() != null)
+            entity.setDisplayOrder(dto.getDisplayOrder());
+        if (dto.getSalaryItemType() != null)
+            entity.setSalaryItemType(dto.getSalaryItemType());
+        if (dto.getDefaultAmount() != null)
+            entity.setDefaultAmount(dto.getDefaultAmount());
+        if (dto.getFormula() != null)
+            entity.setFormula(dto.getFormula());
+
+        if (dto.getSalaryTemplate() != null && dto.getSalaryTemplate().getId() != null) {
+            entity.setSalaryTemplate(SalaryTemplateDto.toEntity(dto.getSalaryTemplate()));
+        }
+        return entity;
+    }
     public String getCode() {
         return code;
     }
