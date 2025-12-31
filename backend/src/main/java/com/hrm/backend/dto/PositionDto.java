@@ -3,9 +3,13 @@ package com.hrm.backend.dto;
 
 import com.hrm.backend.entity.Position;
 
+import java.util.UUID;
+
 public class PositionDto extends BaseObjectDto {
     private DepartmentDto department;
+    private UUID departmentId;
     private StaffDto staff;
+    private UUID staffId;
     private Boolean isMain;
 
     public PositionDto() {
@@ -16,9 +20,11 @@ public class PositionDto extends BaseObjectDto {
         if (entity != null) {
             if (isGetDepartment && entity.getDepartment() != null) {
                 this.department = new DepartmentDto(entity.getDepartment(), false, false, false);
+                this.departmentId = entity.getDepartment().getId();
             }
             if (isGetStaff && entity.getStaff() != null) {
                 this.staff = new StaffDto(entity.getStaff(), false);
+                this.staffId = entity.getStaff().getId();
             }
             this.isMain = entity.getIsMain();
         }
@@ -46,6 +52,22 @@ public class PositionDto extends BaseObjectDto {
 
     public void setIsMain(Boolean main) {
         isMain = main;
+    }
+
+    public UUID getDepartmentId() {
+        return departmentId;
+    }
+
+    public void setDepartmentId(UUID departmentId) {
+        this.departmentId = departmentId;
+    }
+
+    public UUID getStaffId() {
+        return staffId;
+    }
+
+    public void setStaffId(UUID staffId) {
+        this.staffId = staffId;
     }
 
 }
