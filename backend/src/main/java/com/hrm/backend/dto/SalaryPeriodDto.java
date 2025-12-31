@@ -3,6 +3,7 @@ package com.hrm.backend.dto;
 
 import com.hrm.backend.entity.SalaryPeriod;
 import jakarta.validation.Valid;
+import org.springframework.util.StringUtils;
 
 import java.util.Date;
 
@@ -24,6 +25,30 @@ public class SalaryPeriodDto extends BaseObjectDto {
             this.salaryPeriodStatus = entity.getSalaryPeriodStatus();
             this.estimatedWorkingDays = entity.getEstimatedWorkingDays();
         }
+    }
+
+    public static SalaryPeriod toEntity(SalaryPeriodDto dto) {
+        SalaryPeriod entity = new SalaryPeriod();
+        if (dto != null) {
+            if (dto.getId() != null)
+                entity.setId(dto.getId());
+            if (StringUtils.hasText(dto.getCode()))
+                entity.setCode(dto.getCode().trim());
+            if (StringUtils.hasText(dto.getName()))
+                entity.setName(dto.getName().trim());
+            if (dto.getDescription() != null)
+                entity.setDescription(dto.getDescription());
+
+            if (dto.getStartDate() != null)
+                entity.setStartDate(dto.getStartDate());
+            if (dto.getEndDate() != null)
+                entity.setEndDate(dto.getEndDate());
+            if (dto.getSalaryPeriodStatus() != null)
+                entity.setSalaryPeriodStatus(dto.getSalaryPeriodStatus());
+            if (dto.getEstimatedWorkingDays() != null)
+                entity.setEstimatedWorkingDays(dto.getEstimatedWorkingDays());
+        }
+        return entity;
     }
 
     public Date getStartDate() {
