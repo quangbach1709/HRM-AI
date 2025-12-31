@@ -13,8 +13,6 @@ public interface SalaryTemplateItemService {
     // ===== PAGINATION =====
     PageResponse<SalaryTemplateItemDto> search(SearchSalaryTemplateItemDto dto);
 
-    PageResponse<SalaryTemplateItemDto> paging(SearchDto dto);
-
     // ===== CRUD =====
     SalaryTemplateItemDto getById(UUID id);
 

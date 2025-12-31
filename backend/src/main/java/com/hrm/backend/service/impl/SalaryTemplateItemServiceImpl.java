@@ -1,5 +1,6 @@
 package com.hrm.backend.service.impl;
 
+import com.hrm.backend.dto.SalaryTemplateDto;
 import com.hrm.backend.dto.SalaryTemplateItemDto;
 import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.dto.response.PageResponse;
@@ -51,12 +52,6 @@ public class SalaryTemplateItemServiceImpl implements SalaryTemplateItemService 
         return PageResponse.of(dtoPage);
     }
 
-    @Override
-    public PageResponse<SalaryTemplateItemDto> paging(SearchDto dto) {
-        SearchSalaryTemplateItemDto searchDto = SearchSalaryTemplateItemDto.fromSearchDto(dto);
-        return search(searchDto);
-    }
-
     // ==================== GET ====================
 
     @Override
@@ -88,9 +83,12 @@ public class SalaryTemplateItemServiceImpl implements SalaryTemplateItemService 
     @Transactional
     public SalaryTemplateItemDto create(SalaryTemplateItemDto dto) {
         validateForCreate(dto);
+        if (dto.getSalaryTemplate() != null && dto.getSalaryTemplate().getId() != null) {
+            salaryTemplateRepository.findById(dto.getSalaryTemplate().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("SalaryTemplate not found"));
+        }
+        SalaryTemplateItem entity = SalaryTemplateItemDto.toEntity(dto);
 
-        SalaryTemplateItem entity = new SalaryTemplateItem();
-        mapDtoToEntity(dto, entity);
 
         entity.setCreatedAt(LocalDateTime.now());
         entity.setVoided(false);
@@ -108,8 +106,8 @@ public class SalaryTemplateItemServiceImpl implements SalaryTemplateItemService 
                 .orElseThrow(() -> new EntityNotFoundException("SalaryTemplateItem not found: " + id));
 
         validateForUpdate(dto, entity);
-
-        mapDtoToEntity(dto, entity);
+        dto.setId(id);
+        entity = SalaryTemplateItemDto.toEntity(dto);
 
         entity.setUpdatedAt(LocalDateTime.now());
 
@@ -147,27 +145,6 @@ public class SalaryTemplateItemServiceImpl implements SalaryTemplateItemService 
     }
 
     // ==================== PRIVATE HELPER METHODS ====================
-
-    private void mapDtoToEntity(SalaryTemplateItemDto dto, SalaryTemplateItem entity) {
-        if (StringUtils.hasText(dto.getCode()))
-            entity.setCode(dto.getCode().trim());
-        if (StringUtils.hasText(dto.getName()))
-            entity.setName(dto.getName().trim());
-        if (dto.getDisplayOrder() != null)
-            entity.setDisplayOrder(dto.getDisplayOrder());
-        if (dto.getSalaryItemType() != null)
-            entity.setSalaryItemType(dto.getSalaryItemType());
-        if (dto.getDefaultAmount() != null)
-            entity.setDefaultAmount(dto.getDefaultAmount());
-        if (dto.getFormula() != null)
-            entity.setFormula(dto.getFormula());
-
-        if (dto.getSalaryTemplate() != null && dto.getSalaryTemplate().getId() != null) {
-            SalaryTemplate template = salaryTemplateRepository.findById(dto.getSalaryTemplate().getId())
-                    .orElseThrow(() -> new EntityNotFoundException("SalaryTemplate not found"));
-            entity.setSalaryTemplate(template);
-        }
-    }
 
     private void validateForCreate(SalaryTemplateItemDto dto) {
         if (!StringUtils.hasText(dto.getCode()))
