@@ -6,8 +6,10 @@ import com.hrm.backend.dto.search.SearchPositionDto;
 import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.entity.Department;
 import com.hrm.backend.entity.Position;
+import com.hrm.backend.entity.Staff;
 import com.hrm.backend.repository.DepartmentRepository;
 import com.hrm.backend.repository.PositionRepository;
+import com.hrm.backend.repository.StaffRepository;
 import com.hrm.backend.service.PositionService;
 import com.hrm.backend.specification.PositionSpecification;
 import jakarta.persistence.EntityNotFoundException;
@@ -33,12 +35,15 @@ public class PositionServiceImpl implements PositionService {
 
     private final PositionSpecification positionSpecification;
 
+    private final StaffRepository staffRepository;
+
     @Autowired
     public PositionServiceImpl(PositionRepository positionRepository, DepartmentRepository departmentRepository,
-            PositionSpecification positionSpecification) {
+                               PositionSpecification positionSpecification, StaffRepository staffRepository) {
         this.positionRepository = positionRepository;
         this.departmentRepository = departmentRepository;
         this.positionSpecification = positionSpecification;
+        this.staffRepository = staffRepository;
     }
 
     @Override
@@ -77,12 +82,27 @@ public class PositionServiceImpl implements PositionService {
                     .orElseThrow(() -> new EntityNotFoundException(
                             "Không tìm thấy phòng ban với ID: " + dto.getDepartment().getId()));
             entity.setDepartment(department);
+        } else if (dto.getDepartmentId() != null) {
+            Department department = departmentRepository.findById(dto.getDepartmentId())
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Không tìm thấy phòng ban với ID: " + dto.getDepartmentId()));
+            entity.setDepartment(department);
         } else {
             entity.setDepartment(null);
         }
 
-        if (dto.getStaff() != null) {
-            // Staff assignment logic can be added here if needed
+        if (dto.getStaff() != null && dto.getStaff().getId() != null) {
+            Staff staff = staffRepository.findById(dto.getStaff().getId())
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Không tìm thấy nhân viên với ID: " + dto.getStaff().getId()));
+            entity.setStaff(staff);
+        } else  if (dto.getStaffId() != null) {
+            Staff staff = staffRepository.findById(dto.getStaffId())
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Không tìm thấy nhân viên với ID: " + dto.getStaffId()));
+            entity.setStaff(staff);
+        } else {
+            entity.setStaff(null);
         }
 
         Position savedEntity = positionRepository.save(entity);
