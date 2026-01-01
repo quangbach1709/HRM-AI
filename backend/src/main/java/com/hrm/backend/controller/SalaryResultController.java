@@ -29,14 +29,7 @@ public class SalaryResultController {
         return ResponseEntity.ok(service.search(dto));
     }
 
-    @PostMapping("/paging")
-    @Secured({ "ROLE_MANAGER", "ROLE_ADMIN", "ROLE_HR" })
-    public ResponseEntity<PageResponse<SalaryResultDto>> paging(
-            @RequestBody SearchDto dto) {
-        return ResponseEntity.ok(service.paging(dto));
-    }
-
-    @GetMapping("/{id}")
+        @GetMapping("/{id}")
     @Secured({ "ROLE_MANAGER", "ROLE_ADMIN", "ROLE_HR" })
     public ResponseEntity<SalaryResultDto> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(service.getById(id));

@@ -24,6 +24,18 @@ public class SalaryResultItemDetailDto extends AuditableDto {
         }
     }
 
+    public static SalaryResultItemDetail toEntity(SalaryResultItemDetailDto dto) {
+        if (dto == null) {
+            return null;
+        }
+        SalaryResultItemDetail entity = new SalaryResultItemDetail();
+        entity.setId(dto.getId());
+        entity.setSalaryResultItem(SalaryResultItemDto.toEntity(dto.getSalaryResultItem()));
+        entity.setSalaryTemplateItem(SalaryTemplateItemDto.toEntity(dto.getSalaryTemplateItem()));
+        entity.setValue(dto.getValue());
+        return entity;
+    }
+
     public SalaryResultItemDto getSalaryResultItem() {
         return salaryResultItem;
     }

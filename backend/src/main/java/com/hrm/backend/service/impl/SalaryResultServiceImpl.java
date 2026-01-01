@@ -54,12 +54,6 @@ public class SalaryResultServiceImpl implements SalaryResultService {
     }
 
     @Override
-    public PageResponse<SalaryResultDto> paging(SearchDto dto) {
-        SearchSalaryResultDto searchDto = SearchSalaryResultDto.fromSearchDto(dto);
-        return search(searchDto);
-    }
-
-    @Override
     public SalaryResultDto getById(UUID id) {
         return repository.findById(id)
                 .map(e -> new SalaryResultDto(e, true))
@@ -79,8 +73,7 @@ public class SalaryResultServiceImpl implements SalaryResultService {
     public SalaryResultDto create(SalaryResultDto dto) {
         validateForCreate(dto);
 
-        SalaryResult entity = new SalaryResult();
-        mapDtoToEntity(dto, entity);
+        SalaryResult entity = SalaryResultDto.toEntity(dto);
 
         entity.setCreatedAt(LocalDateTime.now());
         entity.setVoided(false);
@@ -97,7 +90,7 @@ public class SalaryResultServiceImpl implements SalaryResultService {
 
         validateForUpdate(dto, entity);
 
-        mapDtoToEntity(dto, entity);
+        entity = SalaryResultDto.toEntity(dto);
         entity.setUpdatedAt(LocalDateTime.now());
 
         entity = repository.save(entity);
@@ -127,24 +120,6 @@ public class SalaryResultServiceImpl implements SalaryResultService {
         return repository.findAll(spec, sort).stream()
                 .map(e -> new SalaryResultDto(e, false))
                 .collect(Collectors.toList());
-    }
-
-    private void mapDtoToEntity(SalaryResultDto dto, SalaryResult entity) {
-        if (StringUtils.hasText(dto.getName())) {
-            entity.setName(dto.getName());
-        }
-
-        if (dto.getSalaryPeriod() != null && dto.getSalaryPeriod().getId() != null) {
-            SalaryPeriod period = salaryPeriodRepository.findById(dto.getSalaryPeriod().getId())
-                    .orElseThrow(() -> new EntityNotFoundException("SalaryPeriod not found"));
-            entity.setSalaryPeriod(period);
-        }
-
-        if (dto.getSalaryTemplate() != null && dto.getSalaryTemplate().getId() != null) {
-            SalaryTemplate template = salaryTemplateRepository.findById(dto.getSalaryTemplate().getId())
-                    .orElseThrow(() -> new EntityNotFoundException("SalaryTemplate not found"));
-            entity.setSalaryTemplate(template);
-        }
     }
 
     private void validateForCreate(SalaryResultDto dto) {

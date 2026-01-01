@@ -11,8 +11,6 @@ import java.util.UUID;
 public interface SalaryResultService {
     PageResponse<SalaryResultDto> search(SearchSalaryResultDto dto);
 
-    PageResponse<SalaryResultDto> paging(SearchDto dto);
-
     SalaryResultDto getById(UUID id);
 
     SalaryResultDto create(SalaryResultDto dto);
