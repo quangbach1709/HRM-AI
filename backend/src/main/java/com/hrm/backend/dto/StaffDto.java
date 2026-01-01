@@ -56,6 +56,24 @@ public class StaffDto extends PersonDto {
         }
     }
 
+    public static Staff toEntity(StaffDto dto) {
+        if (dto == null) {
+            return null;
+        }
+        Staff entity = new Staff();
+        entity.setId(dto.getId());
+        entity.setStaffCode(dto.getStaffCode());
+        entity.setRecruitmentDate(dto.getRecruitmentDate());
+        entity.setStartDate(dto.getStartDate());
+        entity.setApprenticeDays(dto.getApprenticeDays());
+        entity.setEmployeeStatus(dto.getEmployeeStatus());
+        entity.setStaffPhase(dto.getStaffPhase());
+        entity.setRequireAttendance(dto.getRequireAttendance());
+        entity.setAllowExternalIpTimekeeping(dto.getAllowExternalIpTimekeeping());
+        entity.setSalaryTemplate(SalaryTemplateDto.toEntity(dto.getSalaryTemplate()));
+        return entity;
+    }
+
     public String getStaffCode() {
         return staffCode;
     }

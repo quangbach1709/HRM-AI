@@ -3,9 +3,12 @@ package com.hrm.backend.dto;
 
 import com.hrm.backend.entity.SalaryResultItem;
 import com.hrm.backend.entity.SalaryResultItemDetail;
+import com.hrm.backend.entity.SalaryTemplateItem;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class SalaryResultItemDto extends AuditableDto {
     private SalaryResultDto salaryResult;
@@ -44,6 +47,24 @@ public class SalaryResultItemDto extends AuditableDto {
                 }
             }
         }
+    }
+
+    public static SalaryResultItem toEntity(SalaryResultItemDto dto) {
+        if (dto == null) {
+            return null;
+        }
+        SalaryResultItem entity = new SalaryResultItem();
+        entity.setId(dto.getId());
+        entity.setSalaryResult(SalaryResultDto.toEntity(dto.getSalaryResult()));
+        entity.setStaff(StaffDto.toEntity(dto.getStaff()));
+        if (dto.getSalaryResultItemDetails() != null && !dto.getSalaryResultItemDetails().isEmpty()) {
+            Set<SalaryResultItemDetail> details = new HashSet<>();
+            for (SalaryResultItemDetailDto detailDto : dto.getSalaryResultItemDetails()) {
+                details.add(SalaryResultItemDetailDto.toEntity(detailDto));
+            }
+            entity.setSalaryResultItemDetails(details);
+        }
+        return entity;
     }
 
     public SalaryResultDto getSalaryResult() {
