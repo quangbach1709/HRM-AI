@@ -6,6 +6,7 @@ import com.hrm.backend.dto.response.PageResponse;
 import com.hrm.backend.dto.search.SearchSalaryResultItemDto;
 import com.hrm.backend.entity.SalaryResult;
 import com.hrm.backend.entity.SalaryResultItem;
+import com.hrm.backend.entity.SalaryResultItemDetail;
 import com.hrm.backend.entity.Staff;
 import com.hrm.backend.repository.SalaryResultItemRepository;
 import com.hrm.backend.repository.SalaryResultRepository;
@@ -49,12 +50,6 @@ public class SalaryResultItemServiceImpl implements SalaryResultItemService {
         Page<SalaryResultItemDto> dtoPage = page.map(e -> new SalaryResultItemDto(e, false));
 
         return PageResponse.of(dtoPage);
-    }
-
-    @Override
-    public PageResponse<SalaryResultItemDto> paging(SearchDto dto) {
-        SearchSalaryResultItemDto searchDto = SearchSalaryResultItemDto.fromSearchDto(dto);
-        return search(searchDto);
     }
 
     @Override
@@ -134,7 +129,7 @@ public class SalaryResultItemServiceImpl implements SalaryResultItemService {
                 .collect(Collectors.toList());
     }
 
-    private void mapDtoToEntity(SalaryResultItemDto dto, SalaryResultItem entity) {
+    public void mapDtoToEntity(SalaryResultItemDto dto, SalaryResultItem entity) {
         if (dto.getSalaryResult() != null && dto.getSalaryResult().getId() != null) {
             SalaryResult salaryResult = salaryResultRepository.findById(dto.getSalaryResult().getId())
                     .orElseThrow(() -> new EntityNotFoundException("SalaryResult not found"));
