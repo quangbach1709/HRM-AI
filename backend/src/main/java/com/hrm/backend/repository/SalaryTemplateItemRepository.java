@@ -27,4 +27,10 @@ public interface SalaryTemplateItemRepository
     boolean existsByCodeAndSalaryTemplateIdAndIdNot(String code, UUID salaryTemplateId, UUID id);
 
     List<SalaryTemplateItem> findBySalaryTemplateId(UUID salaryTemplateId);
+
+    /**
+     * Find all items for a template, ordered by displayOrder for proper calculation
+     * sequence
+     */
+    List<SalaryTemplateItem> findBySalaryTemplateIdOrderByDisplayOrderAsc(UUID salaryTemplateId);
 }
