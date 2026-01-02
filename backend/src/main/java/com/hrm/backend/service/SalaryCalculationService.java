@@ -3,6 +3,8 @@ package com.hrm.backend.service;
 import com.hrm.backend.dto.CalculateSalaryRequestDto;
 import com.hrm.backend.dto.CalculateSalaryResponseDto;
 
+import java.util.List;
+
 /**
  * Service for calculating employee salaries
  */
@@ -15,4 +17,6 @@ public interface SalaryCalculationService {
      * @return The calculation result with all salary items
      */
     CalculateSalaryResponseDto calculate(CalculateSalaryRequestDto request);
+
+    List<CalculateSalaryResponseDto> calculateAllStaff(CalculateSalaryRequestDto request);
 }

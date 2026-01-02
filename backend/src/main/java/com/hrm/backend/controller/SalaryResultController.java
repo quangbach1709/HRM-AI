@@ -42,6 +42,19 @@ public class SalaryResultController {
         return ResponseEntity.ok(salaryCalculationService.calculate(request));
     }
 
+    /**
+     * Calculate salary for all staff members
+     *
+     * @param request Contains salaryPeriodId
+     * @return List of calculation requests for all staff
+     */
+    @PostMapping("/calculate-all")
+    @Secured({ HRConstants.ROLE_ADMIN , HRConstants.ROLE_HR, HRConstants.ROLE_MANAGER })
+    public ResponseEntity<List<CalculateSalaryResponseDto>> calculateSalaryForAll(
+            @RequestBody CalculateSalaryRequestDto request) {
+        return ResponseEntity.ok(salaryCalculationService.calculateAllStaff(request));
+    }
+
     // ==================== CRUD OPERATIONS ====================
 
     @PostMapping("/search")

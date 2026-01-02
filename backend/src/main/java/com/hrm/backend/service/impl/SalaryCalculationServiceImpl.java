@@ -3,9 +3,11 @@ package com.hrm.backend.service.impl;
 import com.hrm.backend.dto.CalculateSalaryRequestDto;
 import com.hrm.backend.dto.CalculateSalaryResponseDto;
 import com.hrm.backend.dto.CalculateSalaryResponseDto.SalaryItemDetailDto;
+import com.hrm.backend.dto.StaffDto;
 import com.hrm.backend.entity.*;
 import com.hrm.backend.repository.*;
 import com.hrm.backend.service.SalaryCalculationService;
+import com.hrm.backend.service.StaffService;
 import com.hrm.backend.utils.FormulaEvaluator;
 import com.hrm.backend.utils.HRConstants;
 import jakarta.persistence.EntityNotFoundException;
@@ -35,6 +37,7 @@ public class SalaryCalculationServiceImpl implements SalaryCalculationService {
     private final SalaryResultItemDetailRepository salaryResultItemDetailRepository;
     private final StaffWorkScheduleRepository staffWorkScheduleRepository;
     private final StaffLabourAgreementRepository staffLabourAgreementRepository;
+    private final StaffService staffService;
 
     @Override
     public CalculateSalaryResponseDto calculate(CalculateSalaryRequestDto request) {
@@ -134,6 +137,32 @@ public class SalaryCalculationServiceImpl implements SalaryCalculationService {
         return response;
     }
 
+    @Override
+    public List<CalculateSalaryResponseDto> calculateAllStaff(CalculateSalaryRequestDto request) {
+        if (request.getAllStaff()) {
+            List<StaffDto> staffList = staffService.getAll();
+            List<CalculateSalaryResponseDto> results = new ArrayList<>();
+            for (StaffDto staff : staffList) {
+                CalculateSalaryRequestDto req = new CalculateSalaryRequestDto();
+                req.setStaffId(staff.getId());
+                req.setSalaryPeriodId(request.getSalaryPeriodId());
+                req.setSalaryResultId(request.getSalaryResultId());
+
+                try {
+                    CalculateSalaryResponseDto res = calculate(req);
+                    log.info("Calculated salary for staff {}: total = {}",
+                            staff.getStaffCode(), res.getTotalSalary());
+                    results.add(res);
+                } catch (Exception e) {
+                    log.error("Failed to calculate salary for staff {}: {}",
+                            staff.getStaffCode(), e.getMessage());
+                }
+            }
+            return results;
+        }
+        throw new IllegalArgumentException("AllStaff flag must be true to calculate for all staff");
+    }
+
     /**
      * Collect SYSTEM type values from various sources
      */
@@ -217,13 +246,23 @@ public class SalaryCalculationServiceImpl implements SalaryCalculationService {
      */
     private SalaryResult getOrCreateSalaryResult(SalaryPeriod salaryPeriod, SalaryTemplate salaryTemplate,
             UUID existingResultId) {
+        // If specific result ID is provided, use it
         if (existingResultId != null) {
             return salaryResultRepository.findById(existingResultId)
                     .orElseThrow(() -> new EntityNotFoundException("SalaryResult not found: " + existingResultId));
         }
 
         // Check if result already exists for this period and template
-        // For now, create a new one
+        Optional<SalaryResult> existingResult = salaryResultRepository
+                .findBySalaryPeriodIdAndSalaryTemplateIdAndVoidedFalse(salaryPeriod.getId(), salaryTemplate.getId());
+
+        if (existingResult.isPresent()) {
+            log.debug("Found existing SalaryResult {} for period {} and template {}",
+                    existingResult.get().getId(), salaryPeriod.getName(), salaryTemplate.getName());
+            return existingResult.get();
+        }
+
+        // Create new result if not found
         SalaryResult salaryResult = new SalaryResult();
         salaryResult.setSalaryPeriod(salaryPeriod);
         salaryResult.setSalaryTemplate(salaryTemplate);
@@ -231,6 +270,8 @@ public class SalaryCalculationServiceImpl implements SalaryCalculationService {
         salaryResult.setCreatedAt(LocalDateTime.now());
         salaryResult.setVoided(false);
 
+        log.info("Created new SalaryResult for period {} and template {}",
+                salaryPeriod.getName(), salaryTemplate.getName());
         return salaryResultRepository.save(salaryResult);
     }
 
