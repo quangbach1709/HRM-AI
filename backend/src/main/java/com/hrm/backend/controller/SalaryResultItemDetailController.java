@@ -30,12 +30,6 @@ public class SalaryResultItemDetailController {
         return ResponseEntity.ok(service.search(dto));
     }
 
-    @PostMapping("/paging")
-    @Secured({ HRConstants.ROLE_ADMIN, HRConstants.ROLE_MANAGER, HRConstants.ROLE_HR })
-    public ResponseEntity<PageResponse<SalaryResultItemDetailDto>> paging(
-            @RequestBody SearchDto dto) {
-        return ResponseEntity.ok(service.paging(dto));
-    }
 
     @GetMapping("/{id}")
     @Secured({ HRConstants.ROLE_ADMIN, HRConstants.ROLE_MANAGER, HRConstants.ROLE_HR })

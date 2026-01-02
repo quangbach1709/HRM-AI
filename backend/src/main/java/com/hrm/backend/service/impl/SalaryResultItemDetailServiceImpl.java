@@ -52,12 +52,6 @@ public class SalaryResultItemDetailServiceImpl implements SalaryResultItemDetail
     }
 
     @Override
-    public PageResponse<SalaryResultItemDetailDto> paging(SearchDto dto) {
-        SearchSalaryResultItemDetailDto searchDto = SearchSalaryResultItemDetailDto.fromSearchDto(dto);
-        return search(searchDto);
-    }
-
-    @Override
     public SalaryResultItemDetailDto getById(UUID id) {
         return repository.findById(id)
                 .map(e -> new SalaryResultItemDetailDto(e, true, true))

@@ -13,8 +13,6 @@ public interface SalaryResultItemDetailService {
     // Pagination
     PageResponse<SalaryResultItemDetailDto> search(SearchSalaryResultItemDetailDto dto);
 
-    PageResponse<SalaryResultItemDetailDto> paging(SearchDto dto);
-
     // CRUD
     SalaryResultItemDetailDto getById(UUID id);
 
