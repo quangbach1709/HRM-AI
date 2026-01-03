@@ -156,6 +156,19 @@ public class UserServiceImpl implements UserService {
         throw new SecurityException("Bạn chưa đăng nhập");
     }
 
+    @Override
+    @Transactional
+    public UserDto updatePasswordUser(UserDto dto) {
+        User currentUser = getCurrentUserEntity();
+        if (!StringUtils.hasText(dto.getPassword())) {
+            throw new IllegalArgumentException("Mật khẩu mới không được để trống");
+        }
+        currentUser.setPassword(passwordEncoder.encode(dto.getPassword()));
+        currentUser.setUpdatedAt(LocalDateTime.now());
+        currentUser = repository.saveAndFlush(currentUser);
+        return new UserDto(currentUser);
+    }
+
     private void mapDtoToEntity(UserDto dto, User entity) {
         if (StringUtils.hasText(dto.getUsername()))
             entity.setUsername(dto.getUsername());

@@ -101,4 +101,10 @@ public class UserController {
     public ResponseEntity<List<UserDto>> export(@RequestBody SearchUserDto dto) {
         return ResponseEntity.ok(service.exportToExcel(dto));
     }
+
+    @PostMapping("/update-password")
+    @Secured({HRConstants.ROLE_USER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_MANAGER, HRConstants.ROLE_HR})
+    public ResponseEntity<UserDto> updatePasswordUser(@RequestBody UserDto dto) {
+        return ResponseEntity.ok(service.updatePasswordUser(dto));
+    }
 }
