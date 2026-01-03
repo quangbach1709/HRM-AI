@@ -30,6 +30,12 @@ public class SalaryResultItemDetailController {
         return ResponseEntity.ok(service.search(dto));
     }
 
+    @PostMapping("/current-user/search")
+    @Secured({ HRConstants.ROLE_USER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_MANAGER, HRConstants.ROLE_HR })
+    public ResponseEntity<PageResponse<SalaryResultItemDetailDto>> searchForCurrentUser(@RequestBody SearchSalaryResultItemDetailDto dto) {
+        return ResponseEntity.ok(service.searchForCurrentUser(dto));
+    }
+
 
     @GetMapping("/{id}")
     @Secured({ HRConstants.ROLE_ADMIN, HRConstants.ROLE_MANAGER, HRConstants.ROLE_HR })

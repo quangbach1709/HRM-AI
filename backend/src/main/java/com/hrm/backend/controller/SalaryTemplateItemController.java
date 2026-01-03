@@ -92,7 +92,7 @@ public class SalaryTemplateItemController {
 
     // ==================== ADDITIONAL ====================
 
-    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR })
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR,HRConstants.ROLE_USER })
     @GetMapping("/all")
     public ResponseEntity<List<SalaryTemplateItemDto>> getAllList() {
         return ResponseEntity.ok(service.getAll());

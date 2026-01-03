@@ -1,16 +1,17 @@
 package com.hrm.backend.service.impl;
 
 import com.hrm.backend.dto.SalaryResultItemDetailDto;
+import com.hrm.backend.dto.StaffDto;
 import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.dto.response.PageResponse;
 import com.hrm.backend.dto.search.SearchSalaryResultItemDetailDto;
-import com.hrm.backend.entity.SalaryResultItem;
-import com.hrm.backend.entity.SalaryResultItemDetail;
-import com.hrm.backend.entity.SalaryTemplateItem;
+import com.hrm.backend.entity.*;
 import com.hrm.backend.repository.SalaryResultItemDetailRepository;
 import com.hrm.backend.repository.SalaryResultItemRepository;
 import com.hrm.backend.repository.SalaryTemplateItemRepository;
 import com.hrm.backend.service.SalaryResultItemDetailService;
+import com.hrm.backend.service.StaffService;
+import com.hrm.backend.service.UserService;
 import com.hrm.backend.specification.SalaryResultItemDetailSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,7 @@ public class SalaryResultItemDetailServiceImpl implements SalaryResultItemDetail
     private final SalaryResultItemDetailSpecification specification;
     private final SalaryResultItemRepository salaryResultItemRepository;
     private final SalaryTemplateItemRepository salaryTemplateItemRepository;
+    private final StaffService staffService;
 
     @Override
     public PageResponse<SalaryResultItemDetailDto> search(SearchSalaryResultItemDetailDto dto) {
@@ -49,6 +51,18 @@ public class SalaryResultItemDetailServiceImpl implements SalaryResultItemDetail
         Page<SalaryResultItemDetailDto> dtoPage = page.map(e -> new SalaryResultItemDetailDto(e, true, true));
 
         return PageResponse.of(dtoPage);
+    }
+
+    @Override
+    public PageResponse<SalaryResultItemDetailDto> searchForCurrentUser(SearchSalaryResultItemDetailDto dto) {
+        if (dto == null) {
+            dto = new SearchSalaryResultItemDetailDto();
+        }
+
+        StaffDto currentStaff = staffService.getCurrentStaff();
+        dto.setStaffId(currentStaff.getId());
+
+        return search(dto);
     }
 
     @Override
