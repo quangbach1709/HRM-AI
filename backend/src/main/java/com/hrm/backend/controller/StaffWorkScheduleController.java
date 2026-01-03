@@ -25,18 +25,11 @@ public class StaffWorkScheduleController {
 
     // ==================== PAGINATION ====================
 
-    @Secured({ HRConstants.ROLE_ADMIN, HRConstants.ROLE_MANAGER, HRConstants.ROLE_HR })
+    @Secured({ HRConstants.ROLE_ADMIN, HRConstants.ROLE_MANAGER, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
     @PostMapping("/search")
     public ResponseEntity<PageResponse<StaffWorkScheduleDto>> search(
             @RequestBody SearchStaffWorkScheduleDto dto) {
         return ResponseEntity.ok(service.search(dto));
-    }
-
-    @Secured({ HRConstants.ROLE_ADMIN, HRConstants.ROLE_MANAGER, HRConstants.ROLE_HR })
-    @PostMapping("/paging")
-    public ResponseEntity<PageResponse<StaffWorkScheduleDto>> paging(
-            @RequestBody SearchDto dto) {
-        return ResponseEntity.ok(service.paging(dto));
     }
 
     // ==================== CRUD ====================
@@ -83,4 +76,18 @@ public class StaffWorkScheduleController {
             @RequestBody SearchStaffWorkScheduleDto dto) {
         return ResponseEntity.ok(service.exportToExcel(dto));
     }
+
+    /**
+     * Unified attendance endpoint for both check-in and check-out.
+     * Logic handled in service:
+     * - If no record exists -> check-in
+     * - If record exists but checkIn is null -> check-in (HR pre-created)
+     * - If record exists and checkIn has value -> check-out
+     */
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
+    @PostMapping("/attendance")
+    public ResponseEntity<StaffWorkScheduleDto> attendance(@RequestBody StaffWorkScheduleDto dto) {
+        return ResponseEntity.ok(service.attendance(dto));
+    }
+
 }

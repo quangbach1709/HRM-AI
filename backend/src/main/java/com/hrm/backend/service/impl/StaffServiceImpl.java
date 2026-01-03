@@ -59,11 +59,6 @@ public class StaffServiceImpl implements StaffService {
     }
 
     @Override
-    public PageResponse<StaffDto> paging(SearchDto dto) {
-        return search(SearchStaffDto.fromSearchDto(dto));
-    }
-
-    @Override
     public StaffDto getById(UUID id) {
         return repository.findById(id)
                 .map(entity -> new StaffDto(entity, true))
@@ -182,7 +177,7 @@ public class StaffServiceImpl implements StaffService {
 
     private void validateForCreate(StaffDto dto) {
         if (!StringUtils.hasText(dto.getStaffCode())) {
-            throw new IllegalArgumentException("Staff code is required");
+            dto.setStaffCode(generateStaffCode());
         }
         if (repository.existsByStaffCode(dto.getStaffCode())) {
             throw new IllegalArgumentException("Staff code already exists: " + dto.getStaffCode());

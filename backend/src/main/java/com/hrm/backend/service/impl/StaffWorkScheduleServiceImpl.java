@@ -12,6 +12,8 @@ import com.hrm.backend.service.StaffService;
 import com.hrm.backend.service.StaffWorkScheduleService;
 import com.hrm.backend.service.UserService;
 import com.hrm.backend.specification.StaffWorkScheduleSpecification;
+import com.hrm.backend.utils.HRConstants;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -51,12 +53,6 @@ public class StaffWorkScheduleServiceImpl implements StaffWorkScheduleService {
         Page<StaffWorkScheduleDto> dtoPage = page.map(entity -> new StaffWorkScheduleDto(entity, false));
 
         return PageResponse.of(dtoPage);
-    }
-
-    @Override
-    public PageResponse<StaffWorkScheduleDto> paging(SearchDto dto) {
-        SearchStaffWorkScheduleDto searchDto = SearchStaffWorkScheduleDto.fromSearchDto(dto);
-        return search(searchDto);
     }
 
     // ==================== GET ====================
@@ -140,7 +136,147 @@ public class StaffWorkScheduleServiceImpl implements StaffWorkScheduleService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Unified attendance method for both check-in and check-out.
+     * Logic:
+     * - If no StaffWorkSchedule exists for staff + today -> Create new (check-in)
+     * - If exists but checkIn is null -> HR pre-created record, do check-in
+     * - If exists and checkIn has value -> Do check-out
+     */
+    @Override
+    @Transactional
+    public StaffWorkScheduleDto attendance(StaffWorkScheduleDto dto) {
+        if (dto.getStaffId() == null) {
+            throw new IllegalArgumentException("Staff is required for attendance");
+        }
+
+        StaffWorkSchedule staffWorkSchedule = repository.findByStaffIdAndWorkingDate(
+                dto.getStaffId(), new Date());
+
+        if (staffWorkSchedule == null) {
+            // Case 1: No record exists -> Create new and do check-in
+            StaffWorkSchedule entity = new StaffWorkSchedule();
+            mapDtoToEntity(dto, entity);
+            entity.setWorkingDate(new Date());
+            entity.setShiftWorkStatus(HRConstants.ShiftWorkStatus.CHECKED_IN.getValue());
+            if (dto.getShiftWorkType() == null) {
+                entity.setShiftWorkType(HRConstants.ShiftWorkType.FULL_DAY.getValue());
+            }
+            entity.setCheckIn(new Date());
+            entity.setCheckOut(null);
+            entity.setCreatedAt(LocalDateTime.now());
+            entity.setVoided(false);
+
+            entity = repository.saveAndFlush(entity);
+            return new StaffWorkScheduleDto(entity, true);
+
+        } else if (staffWorkSchedule.getCheckIn() == null) {
+            // Case 2: Record exists but checkIn is null -> HR pre-created, do check-in
+            mapDtoToEntity(dto, staffWorkSchedule);
+            staffWorkSchedule.setShiftWorkStatus(HRConstants.ShiftWorkStatus.CHECKED_IN.getValue());
+            staffWorkSchedule.setCheckIn(new Date());
+            staffWorkSchedule.setCheckOut(null);
+            staffWorkSchedule.setUpdatedAt(LocalDateTime.now());
+
+            staffWorkSchedule = repository.saveAndFlush(staffWorkSchedule);
+            return new StaffWorkScheduleDto(staffWorkSchedule, true);
+
+        } else {
+            // Case 3: Record exists and checkIn has value -> Do check-out
+            dto.setCheckIn(staffWorkSchedule.getCheckIn());
+            mapDtoToEntity(dto, staffWorkSchedule);
+            staffWorkSchedule.setCheckOut(new Date());
+
+            Integer check = checkShiftWorkStatus(staffWorkSchedule.getCheckIn(), staffWorkSchedule.getCheckOut());
+            staffWorkSchedule.setShiftWorkStatus(HRConstants.ShiftWorkStatus.WORKED_FULL_HOURS.getValue());
+            switch (check) {
+                case 1:
+                    staffWorkSchedule.setShiftWorkType(HRConstants.ShiftWorkType.MORNING.getValue());
+                    break;
+                case 2:
+                    staffWorkSchedule.setShiftWorkType(HRConstants.ShiftWorkType.AFTERNOON.getValue());
+                    break;
+                case 3:
+                    staffWorkSchedule.setShiftWorkType(HRConstants.ShiftWorkType.FULL_DAY.getValue());
+                    break;
+                case 0:
+                    staffWorkSchedule.setShiftWorkStatus(HRConstants.ShiftWorkStatus.INSUFFICIENT_HOURS.getValue());
+                default:
+                    break;
+            }
+            staffWorkSchedule.setUpdatedAt(LocalDateTime.now());
+
+            staffWorkSchedule = repository.saveAndFlush(staffWorkSchedule);
+            return new StaffWorkScheduleDto(staffWorkSchedule, true);
+        }
+    }
+
     // ==================== HELPERS ====================
+
+    /**
+     * Kiểm tra nhân viên làm đủ giờ ca nào
+     * So sánh thời gian checkIn và checkOut với thời gian của từng ca làm việc
+     *
+     * @param checkIn  Thời gian vào làm
+     * @param checkOut Thời gian ra về
+     * @return Giá trị của ca làm việc nếu làm đủ giờ:
+     *         - 1: Ca sáng (8:30 - 12:00)
+     *         - 2: Ca chiều (13:30 - 17:30)
+     *         - 3: Ca nguyên ngày (8:30 - 17:30)
+     *         - 0: Không đủ giờ ca nào
+     */
+    private Integer checkShiftWorkStatus(Date checkIn, Date checkOut) {
+        if (checkIn == null || checkOut == null) {
+            return 0;
+        }
+
+        // Lấy thời gian giờ:phút của checkIn và checkOut để so sánh
+        int checkInMinutes = getMinutesOfDay(checkIn);
+        int checkOutMinutes = getMinutesOfDay(checkOut);
+
+        // Kiểm tra ca nguyên ngày trước (ưu tiên ca lớn hơn)
+        HRConstants.ShiftWorkType fullDay = HRConstants.ShiftWorkType.FULL_DAY;
+        int fullDayStartMinutes = getMinutesOfDay(fullDay.getStartTime());
+        int fullDayEndMinutes = getMinutesOfDay(fullDay.getEndTime());
+
+        if (checkInMinutes <= fullDayStartMinutes && checkOutMinutes >= fullDayEndMinutes) {
+            return fullDay.getValue();
+        }
+
+        // Kiểm tra ca sáng
+        HRConstants.ShiftWorkType morning = HRConstants.ShiftWorkType.MORNING;
+        int morningStartMinutes = getMinutesOfDay(morning.getStartTime());
+        int morningEndMinutes = getMinutesOfDay(morning.getEndTime());
+
+        if (checkInMinutes <= morningStartMinutes && checkOutMinutes >= morningEndMinutes) {
+            return morning.getValue();
+        }
+
+        // Kiểm tra ca chiều
+        HRConstants.ShiftWorkType afternoon = HRConstants.ShiftWorkType.AFTERNOON;
+        int afternoonStartMinutes = getMinutesOfDay(afternoon.getStartTime());
+        int afternoonEndMinutes = getMinutesOfDay(afternoon.getEndTime());
+
+        if (checkInMinutes <= afternoonStartMinutes && checkOutMinutes >= afternoonEndMinutes) {
+            return afternoon.getValue();
+        }
+
+        // Không đủ giờ ca nào
+        return 0;
+    }
+
+    /**
+     * Lấy số phút trong ngày từ Date object
+     * Ví dụ: 8:30 -> 510 phút (8 * 60 + 30)
+     */
+    private int getMinutesOfDay(Date date) {
+        if (date == null) {
+            return 0;
+        }
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE);
+    }
 
     private void mapDtoToEntity(StaffWorkScheduleDto dto, StaffWorkSchedule entity) {
         if (dto.getShiftWorkType() != null) {
@@ -187,7 +323,7 @@ public class StaffWorkScheduleServiceImpl implements StaffWorkScheduleService {
     }
 
     private void validateForCreate(StaffWorkScheduleDto dto) {
-        if ((dto.getStaff() == null || dto.getStaff().getId() == null ) && dto.getStaffId() == null) {
+        if ((dto.getStaff() == null || dto.getStaff().getId() == null) && dto.getStaffId() == null) {
             throw new IllegalArgumentException("Staff is required");
             // Additional validations (e.g., locking checks) can be added here
         }

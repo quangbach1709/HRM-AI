@@ -67,11 +67,6 @@ public class RecruitmentRequestServiceImpl implements RecruitmentRequestService 
     }
 
     @Override
-    public PageResponse<RecruitmentRequestDto> paging(SearchDto dto) {
-        return search(SearchRecruitmentRequestDto.fromSearchDto(dto));
-    }
-
-    @Override
     public RecruitmentRequestDto getById(UUID id) {
         return repository.findById(id)
                 .map(entity -> new RecruitmentRequestDto(entity, true))

@@ -13,8 +13,6 @@ public interface CertificateService {
     // ===== PAGINATION =====
     PageResponse<CertificateDto> search(SearchCertificateDto dto);
 
-    PageResponse<CertificateDto> paging(SearchDto dto);
-
     // ===== CRUD =====
     CertificateDto getById(UUID id);
 

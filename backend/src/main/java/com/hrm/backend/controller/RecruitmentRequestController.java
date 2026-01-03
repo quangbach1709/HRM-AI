@@ -32,13 +32,6 @@ public class RecruitmentRequestController {
     }
 
     @Secured({ HRConstants.ROLE_ADMIN, HRConstants.ROLE_MANAGER, HRConstants.ROLE_HR })
-    @PostMapping("/paging")
-    public ResponseEntity<PageResponse<RecruitmentRequestDto>> paging(
-            @RequestBody SearchDto dto) {
-        return ResponseEntity.ok(service.paging(dto));
-    }
-
-    @Secured({ HRConstants.ROLE_ADMIN, HRConstants.ROLE_MANAGER, HRConstants.ROLE_HR })
     @GetMapping("/{id}")
     public ResponseEntity<RecruitmentRequestDto> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(service.getById(id));

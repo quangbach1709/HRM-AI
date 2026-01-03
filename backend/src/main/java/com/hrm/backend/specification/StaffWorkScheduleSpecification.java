@@ -49,9 +49,9 @@ public class StaffWorkScheduleSpecification extends BaseSpecification<StaffWorkS
                 predicates.add(cb.equal(root.get("id"), dto.getId()));
             }
 
-            // 4. DATE RANGE (Using checkIn as the Start Date of allocation)
+            // 4. DATE RANGE (Using workingDate as the date of allocation)
             Predicate datePredicate = dateRangePredicate(
-                    cb, root.get("checkIn"), dto.getFromDate(), dto.getToDate());
+                    cb, root.get("workingDate"), dto.getFromDate(), dto.getToDate());
             if (datePredicate != null) {
                 predicates.add(datePredicate);
             }

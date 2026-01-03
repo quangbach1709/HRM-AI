@@ -6,6 +6,7 @@ import com.hrm.backend.dto.response.PageResponse;
 import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.dto.search.SearchUserDto;
 import com.hrm.backend.service.UserService;
+import com.hrm.backend.utils.HRConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -75,7 +76,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    @Secured("ROLE_ADMIN")
+    @Secured(HRConstants.ROLE_ADMIN)
     public ResponseEntity<UserDto> update(
             @PathVariable UUID id,
             @RequestBody UserDto dto) {

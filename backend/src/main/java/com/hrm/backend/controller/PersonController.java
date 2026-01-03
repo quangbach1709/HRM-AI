@@ -2,7 +2,6 @@ package com.hrm.backend.controller;
 
 import com.hrm.backend.dto.PersonDto;
 import com.hrm.backend.dto.response.PageResponse;
-import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.dto.search.SearchPersonDto;
 import com.hrm.backend.service.PersonService;
 import com.hrm.backend.utils.HRConstants;
@@ -30,12 +29,6 @@ public class PersonController {
     @PostMapping("/search")
     public ResponseEntity<PageResponse<PersonDto>> search(@RequestBody SearchPersonDto dto) {
         return ResponseEntity.ok(service.search(dto));
-    }
-
-    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
-    @PostMapping("/paging")
-    public ResponseEntity<PageResponse<PersonDto>> paging(@RequestBody SearchDto dto) {
-        return ResponseEntity.ok(service.paging(dto));
     }
 
     @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
@@ -118,5 +111,11 @@ public class PersonController {
     @PostMapping("/export")
     public ResponseEntity<List<PersonDto>> export(@RequestBody SearchPersonDto dto) {
         return ResponseEntity.ok(service.exportToExcel(dto));
+    }
+
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
+    @GetMapping("/current")
+    public ResponseEntity<PersonDto> getCurrentPerson() {
+        return ResponseEntity.ok(service.getCurrentPerson());
     }
 }
