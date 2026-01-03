@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -42,6 +43,7 @@ public class UserServiceImpl implements UserService {
     private final PersonRepository personRepository;
     private final UserSpecification specification;
     private final PasswordEncoder passwordEncoder;
+    private final EntityManager entityManager;
 
     @Override
     public PageResponse<UserDto> search(SearchUserDto dto) {
@@ -101,7 +103,7 @@ public class UserServiceImpl implements UserService {
         User entity = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User not found: " + id));
         validateForUpdate(dto, entity);
-
+        dto.setId(id);
         mapDtoToEntity(dto, entity);
         entity.setUpdatedAt(LocalDateTime.now());
 
@@ -160,29 +162,24 @@ public class UserServiceImpl implements UserService {
         if (StringUtils.hasText(dto.getEmail()))
             entity.setEmail(dto.getEmail());
 
-        // Map Roles
-        if (dto.getRoles() != null && !dto.getRoles().isEmpty()) {
-            // Logic to update roles.
-            // Note: UserRole is a join entity. We need to manage it.
-            // For simplicity, we might just clear and add if we had a proper UserRole
-            // repository or cascade.
-            // But User has `cascade = CascadeType.ALL, orphanRemoval = true` on `roles`.
-            // So updating the `roles` set should work.
-
+        // Map Roles - if roles list is provided (even if empty), update roles
+        if (dto.getRoles() != null) {
             if (entity.getRoles() == null)
                 entity.setRoles(new HashSet<>());
 
-            // This logic is tricky.
-            // Ideally we find existing roles by ID and update the Set.
-            // Or we re-create UserRoles.
-
-            // Create new set of UserRoles
-            // But we need to keep existing IDs if we want to update?
-            // Actually UserRole is mostly a link.
+            // Only flush if there were existing roles to clear (for UPDATE case)
+            boolean hadExistingRoles = !entity.getRoles().isEmpty();
 
             // Clear existing (orphanRemoval handles delete)
             entity.getRoles().clear();
 
+            // Flush to ensure deletes are executed before inserts
+            // This prevents unique constraint violation when re-adding same role
+            if (hadExistingRoles) {
+                entityManager.flush();
+            }
+
+            // Add new roles
             for (var roleDto : dto.getRoles()) {
                 Role role = roleRepository.findById(roleDto.getId())
                         .orElseThrow(() -> new EntityNotFoundException("Role not found: " + roleDto.getId()));

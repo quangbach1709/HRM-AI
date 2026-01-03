@@ -2,12 +2,13 @@ package com.hrm.backend.service.impl;
 
 import com.hrm.backend.dto.PersonDto;
 import com.hrm.backend.dto.response.PageResponse;
-import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.dto.search.SearchPersonDto;
 
 import com.hrm.backend.entity.Person;
+import com.hrm.backend.entity.User;
 import com.hrm.backend.repository.PersonRepository;
 import com.hrm.backend.service.PersonService;
+import com.hrm.backend.service.UserService;
 import com.hrm.backend.specification.PersonSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class PersonServiceImpl implements PersonService {
 
     private final PersonRepository repository;
     private final PersonSpecification specification;
+    private final UserService userService;
 
     // ==================== PAGINATION ====================
 
@@ -48,12 +50,6 @@ public class PersonServiceImpl implements PersonService {
         Page<PersonDto> dtoPage = page.map(entity -> new PersonDto(entity, false));
 
         return PageResponse.of(dtoPage);
-    }
-
-    @Override
-    public PageResponse<PersonDto> paging(SearchDto dto) {
-        SearchPersonDto searchDto = SearchPersonDto.fromSearchDto(dto);
-        return search(searchDto);
     }
 
     // ==================== GET ====================
@@ -144,6 +140,17 @@ public class PersonServiceImpl implements PersonService {
                 .collect(Collectors.toList());
     }
 
+    // ==================== CURRENT USER ====================
+
+    @Override
+    public PersonDto getCurrentPerson() {
+        User currentUser = userService.getCurrentUserEntity();
+        if (currentUser != null && currentUser.getPerson() != null) {
+            return new PersonDto(currentUser.getPerson(), true);
+        }
+        return null;
+    }
+
     // ==================== HELPER METHODS ====================
 
     private void mapDtoToEntity(PersonDto dto, Person entity) {
@@ -153,8 +160,7 @@ public class PersonServiceImpl implements PersonService {
             entity.setLastName(dto.getLastName());
         if (StringUtils.hasText(dto.getDisplayName()))
             entity.setDisplayName(dto.getDisplayName());
-        if (dto.getBirthDate() != null)
-            entity.setBirthDate(dto.getBirthDate());
+        entity.setBirthDate(dto.getBirthDate());
         if (StringUtils.hasText(dto.getBirthPlace()))
             entity.setBirthPlace(dto.getBirthPlace());
         if (dto.getGender() != null)
@@ -165,20 +171,15 @@ public class PersonServiceImpl implements PersonService {
             entity.setIdNumber(dto.getIdNumber());
         if (StringUtils.hasText(dto.getIdNumberIssueBy()))
             entity.setIdNumberIssueBy(dto.getIdNumberIssueBy());
-        if (dto.getIdNumberIssueDate() != null)
-            entity.setIdNumberIssueDate(dto.getIdNumberIssueDate());
+        entity.setIdNumberIssueDate(dto.getIdNumberIssueDate());
         if (StringUtils.hasText(dto.getEmail()))
             entity.setEmail(dto.getEmail());
-        if (dto.getMaritalStatus() != null)
-            entity.setMaritalStatus(dto.getMaritalStatus());
+        entity.setMaritalStatus(dto.getMaritalStatus());
         if (StringUtils.hasText(dto.getTaxCode()))
             entity.setTaxCode(dto.getTaxCode());
-        if (dto.getEducationLevel() != null)
-            entity.setEducationLevel(dto.getEducationLevel());
-        if (dto.getHeight() != null)
-            entity.setHeight(dto.getHeight());
-        if (dto.getWeight() != null)
-            entity.setWeight(dto.getWeight());
+        entity.setEducationLevel(dto.getEducationLevel());
+        entity.setHeight(dto.getHeight());
+        entity.setWeight(dto.getWeight());
 
         // Avatar mapping if needed (complex type)
         if (dto.getAvatar() != null && dto.getAvatar().getId() != null) {

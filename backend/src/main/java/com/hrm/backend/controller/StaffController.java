@@ -1,11 +1,10 @@
 package com.hrm.backend.controller;
 
-
 import com.hrm.backend.dto.StaffDto;
 import com.hrm.backend.dto.response.PageResponse;
-import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.dto.search.SearchStaffDto;
 import com.hrm.backend.service.StaffService;
+import com.hrm.backend.utils.HRConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,19 +23,13 @@ public class StaffController {
     private final StaffService service;
 
     @PostMapping("/search")
-    @Secured({ "ROLE_ADMIN", "ROLE_MANAGER", "ROLE_HR" })
+    @Secured({ HRConstants.ROLE_ADMIN, HRConstants.ROLE_MANAGER, HRConstants.ROLE_HR })
     public ResponseEntity<PageResponse<StaffDto>> search(@RequestBody SearchStaffDto dto) {
         return ResponseEntity.ok(service.search(dto));
     }
 
-    @PostMapping("/paging")
-    @Secured({ "ROLE_ADMIN", "ROLE_MANAGER", "ROLE_HR" })
-    public ResponseEntity<PageResponse<StaffDto>> paging(@RequestBody SearchDto dto) {
-        return ResponseEntity.ok(service.paging(dto));
-    }
-
     @GetMapping
-    @Secured({ "ROLE_ADMIN", "ROLE_MANAGER", "ROLE_HR" })
+    @Secured({ HRConstants.ROLE_ADMIN, HRConstants.ROLE_MANAGER, HRConstants.ROLE_HR })
     public ResponseEntity<PageResponse<StaffDto>> getAll(
             @RequestParam(defaultValue = "0") Integer pageIndex,
             @RequestParam(defaultValue = "10") Integer pageSize,
@@ -49,35 +42,41 @@ public class StaffController {
     }
 
     @GetMapping("/{id}")
-    @Secured({ "ROLE_ADMIN", "ROLE_MANAGER", "ROLE_HR" })
+    @Secured({ HRConstants.ROLE_ADMIN, HRConstants.ROLE_MANAGER, HRConstants.ROLE_HR })
     public ResponseEntity<StaffDto> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(service.getById(id));
     }
 
     @PostMapping
-    @Secured({ "ROLE_ADMIN", "ROLE_MANAGER", "ROLE_HR" })
+    @Secured({ HRConstants.ROLE_ADMIN, HRConstants.ROLE_MANAGER, HRConstants.ROLE_HR })
     public ResponseEntity<StaffDto> create(@RequestBody StaffDto dto) {
         StaffDto created = service.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
-    @Secured({ "ROLE_ADMIN", "ROLE_MANAGER", "ROLE_HR" })
+    @Secured({ HRConstants.ROLE_ADMIN, HRConstants.ROLE_MANAGER, HRConstants.ROLE_HR })
     public ResponseEntity<StaffDto> update(@PathVariable UUID id, @RequestBody StaffDto dto) {
         return ResponseEntity.ok(service.update(id, dto));
     }
 
     @DeleteMapping("/{id}")
-    @Secured({ "ROLE_ADMIN", "ROLE_MANAGER" })
+    @Secured({ HRConstants.ROLE_ADMIN, HRConstants.ROLE_MANAGER })
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/all")
-    @Secured({ "ROLE_ADMIN", "ROLE_MANAGER", "ROLE_HR" })
+    @Secured({ HRConstants.ROLE_ADMIN, HRConstants.ROLE_MANAGER, HRConstants.ROLE_HR })
     public ResponseEntity<List<StaffDto>> getAllList() {
         return ResponseEntity.ok(service.getAll());
+    }
+
+    @GetMapping("/current")
+    @Secured({ HRConstants.ROLE_ADMIN, HRConstants.ROLE_MANAGER, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
+    public ResponseEntity<StaffDto> getCurrentStaff() {
+        return ResponseEntity.ok(service.getCurrentStaff());
     }
 
     @PostMapping("/export")

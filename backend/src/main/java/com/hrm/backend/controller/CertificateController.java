@@ -31,13 +31,6 @@ public class CertificateController {
     }
 
     @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
-    @PostMapping("/paging")
-    public ResponseEntity<PageResponse<CertificateDto>> paging(
-            @RequestBody SearchDto dto) {
-        return ResponseEntity.ok(service.paging(dto));
-    }
-
-    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
     @GetMapping
     public ResponseEntity<PageResponse<CertificateDto>> getAll(
             @RequestParam(defaultValue = "0") Integer pageIndex,

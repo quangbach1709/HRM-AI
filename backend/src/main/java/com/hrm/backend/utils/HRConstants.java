@@ -1,7 +1,5 @@
 package com.hrm.backend.utils;
 
-
-
 import java.util.Date;
 
 public class HRConstants {
@@ -33,7 +31,8 @@ public class HRConstants {
         }
 
         public static String getNameByValue(Integer value) {
-            if (value == null) return null;
+            if (value == null)
+                return null;
             for (Platform item : Platform.values()) {
                 if (item.getValue().equals(value)) {
                     return item.getName();
@@ -47,6 +46,7 @@ public class HRConstants {
         MALE(1, "Nam"),
         FEMALE(2, "Nữ"),
         OTHER(3, "Khác");
+
         private final Integer value;
         private final String name;
 
@@ -64,7 +64,8 @@ public class HRConstants {
         }
 
         public static String getNameByValue(Integer value) {
-            if (value == null) return null;
+            if (value == null)
+                return null;
             for (Gender item : Gender.values()) {
                 if (item.getValue().equals(value)) {
                     return item.getName();
@@ -98,7 +99,8 @@ public class HRConstants {
         }
 
         public static String getNameByValue(Integer value) {
-            if (value == null) return null;
+            if (value == null)
+                return null;
             for (MaritalStatus item : MaritalStatus.values()) {
                 if (item.getValue().equals(value)) {
                     return item.getName();
@@ -135,7 +137,8 @@ public class HRConstants {
         }
 
         public static String getNameByValue(Integer value) {
-            if (value == null) return null;
+            if (value == null)
+                return null;
             for (EducationLevel level : EducationLevel.values()) {
                 if (level.getValue().equals(value)) {
                     return level.getName();
@@ -167,7 +170,8 @@ public class HRConstants {
         }
 
         public static String getNameByValue(Integer value) {
-            if (value == null) return null;
+            if (value == null)
+                return null;
             for (StaffPhase level : StaffPhase.values()) {
                 if (level.getValue().equals(value)) {
                     return level.getName();
@@ -201,7 +205,8 @@ public class HRConstants {
         }
 
         public static String getNameByValue(Integer value) {
-            if (value == null) return null;
+            if (value == null)
+                return null;
             for (EmployeeStatus status : EmployeeStatus.values()) {
                 if (status.getValue().equals(value)) {
                     return status.getName();
@@ -234,7 +239,8 @@ public class HRConstants {
         }
 
         public static String getNameByValue(Integer value) {
-            if (value == null) return null;
+            if (value == null)
+                return null;
             for (StaffLabourAgreementStatus status : StaffLabourAgreementStatus.values()) {
                 if (status.getValue().equals(value)) {
                     return status.getName();
@@ -245,7 +251,7 @@ public class HRConstants {
     }
 
     public enum StaffSocialInsurancePaidStatus {
-        PAID(1, "Đã đóng"),//
+        PAID(1, "Đã đóng"), //
         UNPAID(2, "Chưa đóng");
 
         private final Integer value;
@@ -265,7 +271,8 @@ public class HRConstants {
         }
 
         public static String getNameByValue(Integer value) {
-            if (value == null) return null;
+            if (value == null)
+                return null;
             for (StaffSocialInsurancePaidStatus status : StaffSocialInsurancePaidStatus.values()) {
                 if (status.getValue().equals(value)) {
                     return status.getName();
@@ -317,7 +324,8 @@ public class HRConstants {
         }
 
         public static String getNameByValue(Integer value) {
-            if (value == null) return null;
+            if (value == null)
+                return null;
             for (ShiftWorkType type : ShiftWorkType.values()) {
                 if (type.getValue().equals(value)) {
                     return type.getName();
@@ -359,7 +367,8 @@ public class HRConstants {
         }
 
         public static String getNameByValue(Integer value) {
-            if (value == null) return null;
+            if (value == null)
+                return null;
             for (RecruitmentRequestStatus status : RecruitmentRequestStatus.values()) {
                 if (status.getValue().equals(value)) {
                     return status.getName();
@@ -395,7 +404,8 @@ public class HRConstants {
         }
 
         public static String getNameByValue(Integer value) {
-            if (value == null) return null;
+            if (value == null)
+                return null;
             for (CandidateStatus status : CandidateStatus.values()) {
                 if (status.getValue().equals(value)) {
                     return status.getName();
@@ -430,7 +440,8 @@ public class HRConstants {
         }
 
         public static String getNameByValue(Integer value) {
-            if (value == null) return null;
+            if (value == null)
+                return null;
             for (ShiftWorkStatus status : ShiftWorkStatus.values()) {
                 if (status.getValue().equals(value)) {
                     return status.getName();
@@ -445,6 +456,7 @@ public class HRConstants {
         ACCESS_TOKEN(1, "Access Token"),
         REFRESH_TOKEN(2, "Refresh Token"),
         RESET_TOKEN(3, "Reset Token");
+
         private final Integer value;
         private final String name;
 
@@ -462,7 +474,8 @@ public class HRConstants {
         }
 
         public static String getNameByValue(Integer value) {
-            if (value == null) return null;
+            if (value == null)
+                return null;
             for (TokenType item : TokenType.values()) {
                 if (item.getValue().equals(value)) {
                     return item.getName();
@@ -473,9 +486,9 @@ public class HRConstants {
     }
 
     public enum AdministrativeUnitLevel {
-        PROVINCE(1, "Tỉnh"),        // Cấp Tỉnh
-        DISTRICT(2, "Huyện"),       // Cấp Huyện
-        WARD(3, "Xã");              // Cấp Xã
+        PROVINCE(1, "Tỉnh"), // Cấp Tỉnh
+        DISTRICT(2, "Huyện"), // Cấp Huyện
+        WARD(3, "Xã"); // Cấp Xã
 
         private final Integer value;
         private final String name;
@@ -494,7 +507,8 @@ public class HRConstants {
         }
 
         public static String getNameByValue(Integer value) {
-            if (value == null) return null;
+            if (value == null)
+                return null;
             for (AdministrativeUnitLevel level : AdministrativeUnitLevel.values()) {
                 if (level.getValue().equals(value)) {
                     return level.getName();
@@ -528,7 +542,8 @@ public class HRConstants {
         }
 
         public static String getNameByValue(Integer value) {
-            if (value == null) return null;
+            if (value == null)
+                return null;
             for (ContractType type : ContractType.values()) {
                 if (type.getValue().equals(value)) {
                     return type.getName();
@@ -542,6 +557,7 @@ public class HRConstants {
         VALUE(1, "Giá trị"),
         FORMULA(2, "Công thức"),
         SYSTEM(3, "Hệ thống lấy dự liệu");
+
         private final Integer value;
         private final String name;
 
@@ -559,7 +575,8 @@ public class HRConstants {
         }
 
         public static String getNameByValue(Integer value) {
-            if (value == null) return null;
+            if (value == null)
+                return null;
             for (SalaryItemType type : SalaryItemType.values()) {
                 if (type.getValue().equals(value)) {
                     return type.getName();
@@ -571,7 +588,8 @@ public class HRConstants {
 
     public enum SalaryTemplateItemSystem {
         ACTUAL_NUMBER_OF_WORKING_DAYS("Số ngày công thực tế", "SO_NGAY_CONG_THUC_TE", SalaryItemType.SYSTEM.getValue()),
-        STANDARD_NUMBER_OF_WORKING_DAYS("Số ngày công tiêu chuẩn", "SO_NGAY_CONG_TIEU_CHUAN", SalaryItemType.SYSTEM.getValue()),
+        STANDARD_NUMBER_OF_WORKING_DAYS("Số ngày công tiêu chuẩn", "SO_NGAY_CONG_TIEU_CHUAN",
+                SalaryItemType.SYSTEM.getValue()),
         BASIC_SALARY("Lương cơ bản", "LUONG_CO_BAN", SalaryItemType.SYSTEM.getValue()),
         ;
 
@@ -598,7 +616,6 @@ public class HRConstants {
         }
     }
 
-
     public enum SalaryPeriodStatus {
         DRAFT(1, "Nháp"),
         APPROVED(2, "Đã duyệt"),
@@ -621,7 +638,8 @@ public class HRConstants {
         }
 
         public static String getNameByValue(Integer value) {
-            if (value == null) return null;
+            if (value == null)
+                return null;
             for (SalaryPeriodStatus type : SalaryPeriodStatus.values()) {
                 if (type.getValue().equals(value)) {
                     return type.getName();

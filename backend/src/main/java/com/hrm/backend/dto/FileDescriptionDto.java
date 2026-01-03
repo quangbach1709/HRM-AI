@@ -24,6 +24,19 @@ public class FileDescriptionDto extends AuditableDto {
         }
     }
 
+    public static FileDescription toEntity(FileDescriptionDto dto) {
+        if (dto == null) {
+            return null;
+        }
+        FileDescription entity = new FileDescription();
+        entity.setId(dto.getId());
+        entity.setContentType(dto.getContentType());
+        entity.setContentSize(dto.getContentSize());
+        entity.setName(dto.getName());
+        entity.setExtension(dto.getExtension());
+        entity.setFilePath(dto.getFilePath());
+        return entity;
+    }
 
     public String getContentType() {
         return contentType;

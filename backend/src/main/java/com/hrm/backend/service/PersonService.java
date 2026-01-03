@@ -13,8 +13,6 @@ public interface PersonService {
     // ===== PAGINATION =====
     PageResponse<PersonDto> search(SearchPersonDto dto);
 
-    PageResponse<PersonDto> paging(SearchDto dto);
-
     // ===== CRUD =====
     PersonDto getById(UUID id);
 
@@ -28,4 +26,6 @@ public interface PersonService {
     List<PersonDto> getAll();
 
     List<PersonDto> exportToExcel(SearchPersonDto dto);
+
+    PersonDto getCurrentPerson();
 }

@@ -24,6 +24,17 @@ public class CertificateDto extends BaseObjectDto {
         }
     }
 
+    public static Certificate toEntity(CertificateDto dto) {
+        if (dto == null) {
+            return null;
+        }
+        Certificate entity = new Certificate();
+        entity.setId(dto.getId());
+        entity.setPerson(PersonDto.toEntity(dto.getPerson()));
+        entity.setCertificateFile(FileDescriptionDto.toEntity(dto.getCertificateFile()));
+        return entity;
+    }
+
     public PersonDto getPerson() {
         return person;
     }

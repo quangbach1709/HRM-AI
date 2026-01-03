@@ -1,6 +1,5 @@
 package com.hrm.backend.dto;
 
-
 import com.hrm.backend.entity.Certificate;
 import com.hrm.backend.entity.Person;
 import jakarta.validation.Valid;
@@ -8,6 +7,8 @@ import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import org.hibernate.Hibernate;
 
 @Valid
 public class PersonDto extends AuditableDto {
@@ -59,7 +60,9 @@ public class PersonDto extends AuditableDto {
             this.educationLevel = entity.getEducationLevel();
 
             if (isGetFull) {
-                if (entity.getCertificates() != null && !entity.getCertificates().isEmpty()) {
+                // Check if collection is initialized to prevent LazyInitializationException
+                if (entity.getCertificates() != null && Hibernate.isInitialized(entity.getCertificates())
+                        && !entity.getCertificates().isEmpty()) {
                     this.certificates = new ArrayList<>();
                     for (Certificate certificate : entity.getCertificates()) {
                         CertificateDto dto = new CertificateDto(certificate, false);
@@ -68,6 +71,32 @@ public class PersonDto extends AuditableDto {
                 }
             }
         }
+    }
+
+    public static Person toEntity(PersonDto dto) {
+        if (dto == null) {
+            return null;
+        }
+        Person entity = new Person();
+        entity.setId(dto.getId());
+        entity.setFirstName(dto.getFirstName());
+        entity.setLastName(dto.getLastName());
+        entity.setDisplayName(dto.getDisplayName());
+        entity.setBirthDate(dto.getBirthDate());
+        entity.setBirthPlace(dto.getBirthPlace());
+        entity.setGender(dto.getGender());
+        entity.setPhoneNumber(dto.getPhoneNumber());
+        entity.setIdNumber(dto.getIdNumber());
+        entity.setIdNumberIssueBy(dto.getIdNumberIssueBy());
+        entity.setIdNumberIssueDate(dto.getIdNumberIssueDate());
+        entity.setEmail(dto.getEmail());
+        entity.setMaritalStatus(dto.getMaritalStatus());
+        entity.setTaxCode(dto.getTaxCode());
+        entity.setEducationLevel(dto.getEducationLevel());
+        entity.setHeight(dto.getHeight());
+        entity.setWeight(dto.getWeight());
+        entity.setAvatar(FileDescriptionDto.toEntity(dto.getAvatar()));
+        return entity;
     }
 
     public String getFirstName() {

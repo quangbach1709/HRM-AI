@@ -13,8 +13,6 @@ public interface StaffWorkScheduleService {
     // Pagination
     PageResponse<StaffWorkScheduleDto> search(SearchStaffWorkScheduleDto dto);
 
-    PageResponse<StaffWorkScheduleDto> paging(SearchDto dto);
-
     // CRUD
     StaffWorkScheduleDto getById(UUID id);
 
@@ -28,4 +26,13 @@ public interface StaffWorkScheduleService {
     List<StaffWorkScheduleDto> getAll();
 
     List<StaffWorkScheduleDto> exportToExcel(SearchStaffWorkScheduleDto dto);
+
+    /**
+     * Unified attendance method for both check-in and check-out.
+     * Logic:
+     * - If no StaffWorkSchedule exists for staff + today -> Create new (check-in)
+     * - If exists but checkIn is null -> HR pre-created record, do check-in
+     * - If exists and checkIn has value -> Do check-out
+     */
+    StaffWorkScheduleDto attendance(StaffWorkScheduleDto dto);
 }

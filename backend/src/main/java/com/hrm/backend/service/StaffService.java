@@ -12,8 +12,6 @@ import java.util.UUID;
 public interface StaffService {
     PageResponse<StaffDto> search(SearchStaffDto dto);
 
-    PageResponse<StaffDto> paging(SearchDto dto);
-
     StaffDto getById(UUID id);
 
     StaffDto create(StaffDto dto);

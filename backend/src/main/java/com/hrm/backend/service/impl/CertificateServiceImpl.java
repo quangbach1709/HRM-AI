@@ -53,11 +53,6 @@ public class CertificateServiceImpl implements CertificateService {
         return PageResponse.of(dtoPage);
     }
 
-    @Override
-    public PageResponse<CertificateDto> paging(SearchDto dto) {
-        SearchCertificateDto searchDto = SearchCertificateDto.fromSearchDto(dto);
-        return search(searchDto);
-    }
 
     @Override
     public CertificateDto getById(UUID id) {
@@ -96,8 +91,6 @@ public class CertificateServiceImpl implements CertificateService {
 
         validateForUpdate(dto, entity);
         mapDtoToEntity(dto, entity);
-
-
 
         entity = repository.save(entity);
         return new CertificateDto(entity, true);

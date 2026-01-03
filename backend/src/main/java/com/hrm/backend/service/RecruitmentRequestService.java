@@ -13,8 +13,6 @@ public interface RecruitmentRequestService {
 
     PageResponse<RecruitmentRequestDto> search(SearchRecruitmentRequestDto dto);
 
-    PageResponse<RecruitmentRequestDto> paging(SearchDto dto);
-
     RecruitmentRequestDto getById(UUID id);
 
     RecruitmentRequestDto create(RecruitmentRequestDto dto);
