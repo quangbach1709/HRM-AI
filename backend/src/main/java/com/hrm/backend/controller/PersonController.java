@@ -118,4 +118,17 @@ public class PersonController {
     public ResponseEntity<PersonDto> getCurrentPerson() {
         return ResponseEntity.ok(service.getCurrentPerson());
     }
+
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
+    @PutMapping("/me")
+    public ResponseEntity<PersonDto> updateCurrentPerson(@RequestBody PersonDto dto) {
+        return ResponseEntity.ok(service.updateCurrentPerson(dto));
+    }
+
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
+    @PostMapping("/me/avatar")
+    public ResponseEntity<PersonDto> uploadAvatar(
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        return ResponseEntity.ok(service.uploadAvatarForCurrentUser(file));
+    }
 }

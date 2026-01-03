@@ -1,12 +1,13 @@
 package com.hrm.backend.service.impl;
 
-import com.google.api.gax.rpc.NotFoundException;
 import com.hrm.backend.dto.FileDescriptionDto;
 import com.hrm.backend.entity.FileDescription;
 import com.hrm.backend.repository.FileDescriptionRepository;
 import com.hrm.backend.service.FileDescriptionService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,8 +19,10 @@ import java.util.UUID;
 public class FileDescriptionServiceImpl implements FileDescriptionService {
 
     private final FileDescriptionRepository fileDescriptionRepository;
-    private static final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/";
-
+    // Thư mục uploads nằm cùng cấp với backend và frontend
+    private static final String UPLOAD_DIR = System.getProperty("user.dir").endsWith("backend") 
+        ? System.getProperty("user.dir").replace("\\", "/").replaceAll("/backend$", "/uploads/")
+        : System.getProperty("user.dir").replace("\\", "/") + "/uploads/";
 
     @Autowired
     public FileDescriptionServiceImpl(FileDescriptionRepository fileDescriptionRepository) {
@@ -56,7 +59,8 @@ public class FileDescriptionServiceImpl implements FileDescriptionService {
 
             try {
                 File uploadDir = new File(UPLOAD_DIR);
-                if (!uploadDir.exists()) uploadDir.mkdirs();
+                if (!uploadDir.exists())
+                    uploadDir.mkdirs();
                 file.transferTo(new File(filePath));
                 entity = new FileDescription();
                 entity.setName(originalFileName);
@@ -79,5 +83,22 @@ public class FileDescriptionServiceImpl implements FileDescriptionService {
     public FileDescription getEntityById(UUID id) {
         return fileDescriptionRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("FileDescription with ID " + id + " not found."));
+    }
+
+    @Override
+    public Resource getFileAsResource(UUID id) {
+        FileDescription entity = getEntityById(id);
+        try {
+            java.nio.file.Path filePath = java.nio.file.Paths.get(UPLOAD_DIR + entity.getFilePath());
+            Resource resource = new UrlResource(
+                    filePath.toUri());
+            if (resource.exists() && resource.isReadable()) {
+                return resource;
+            } else {
+                throw new RuntimeException("File not found or not readable: " + entity.getFilePath());
+            }
+        } catch (java.net.MalformedURLException e) {
+            throw new RuntimeException("Error reading file: " + entity.getFilePath(), e);
+        }
     }
 }
