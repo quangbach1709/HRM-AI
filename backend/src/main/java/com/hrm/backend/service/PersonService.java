@@ -4,6 +4,7 @@ import com.hrm.backend.dto.PersonDto;
 import com.hrm.backend.dto.response.PageResponse;
 import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.dto.search.SearchPersonDto;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,4 +29,8 @@ public interface PersonService {
     List<PersonDto> exportToExcel(SearchPersonDto dto);
 
     PersonDto getCurrentPerson();
+
+    PersonDto updateCurrentPerson(PersonDto dto);
+
+    PersonDto uploadAvatarForCurrentUser(MultipartFile file);
 }

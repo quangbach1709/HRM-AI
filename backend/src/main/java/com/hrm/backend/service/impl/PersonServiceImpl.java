@@ -1,9 +1,11 @@
 package com.hrm.backend.service.impl;
 
+import com.hrm.backend.dto.FileDescriptionDto;
 import com.hrm.backend.dto.PersonDto;
 import com.hrm.backend.dto.response.PageResponse;
 import com.hrm.backend.dto.search.SearchPersonDto;
 
+import com.hrm.backend.entity.FileDescription;
 import com.hrm.backend.entity.Person;
 import com.hrm.backend.entity.User;
 import com.hrm.backend.repository.PersonRepository;
@@ -19,7 +21,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -32,6 +36,7 @@ public class PersonServiceImpl implements PersonService {
     private final PersonRepository repository;
     private final PersonSpecification specification;
     private final UserService userService;
+    private final com.hrm.backend.service.FileDescriptionService fileDescriptionService;
 
     // ==================== PAGINATION ====================
 
@@ -149,6 +154,55 @@ public class PersonServiceImpl implements PersonService {
             return new PersonDto(currentUser.getPerson(), true);
         }
         return null;
+    }
+
+    @Override
+    @Transactional
+    public PersonDto updateCurrentPerson(PersonDto dto) {
+        User currentUser = userService.getCurrentUserEntity();
+        if (currentUser == null || currentUser.getPerson() == null) {
+            throw new EntityNotFoundException("Current user does not have a person profile");
+        }
+
+        Person entity = currentUser.getPerson();
+
+        // Update only basic user-editable fields
+        if (StringUtils.hasText(dto.getDisplayName()))
+            entity.setDisplayName(dto.getDisplayName());
+        if (StringUtils.hasText(dto.getPhoneNumber()))
+            entity.setPhoneNumber(dto.getPhoneNumber());
+        if (dto.getBirthDate() != null)
+            entity.setBirthDate(dto.getBirthDate());
+        if (dto.getGender() != null)
+            entity.setGender(dto.getGender());
+        if (StringUtils.hasText(dto.getEmail()))
+            entity.setEmail(dto.getEmail());
+
+        entity.setUpdatedAt(LocalDateTime.now());
+        entity = repository.saveAndFlush(entity);
+        return new PersonDto(entity, true);
+    }
+
+    @Override
+    @Transactional
+    public PersonDto uploadAvatarForCurrentUser(MultipartFile file) {
+        User currentUser = userService.getCurrentUserEntity();
+        if (currentUser == null || currentUser.getPerson() == null) {
+            throw new EntityNotFoundException("Current user does not have a person profile");
+        }
+
+        Person entity = currentUser.getPerson();
+
+        // Save new avatar file
+        FileDescriptionDto avatarDto = fileDescriptionService.saveFile(file);
+        FileDescription avatar = fileDescriptionService.getEntityById(avatarDto.getId());
+
+        // Remove old avatar if exists
+        entity.setAvatar(avatar);
+        entity.setUpdatedAt(java.time.LocalDateTime.now());
+
+        entity = repository.save(entity);
+        return new PersonDto(entity, true);
     }
 
     // ==================== HELPER METHODS ====================
