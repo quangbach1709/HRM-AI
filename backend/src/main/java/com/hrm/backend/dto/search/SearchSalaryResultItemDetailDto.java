@@ -15,6 +15,7 @@ public class SearchSalaryResultItemDetailDto extends SearchDto {
     // ===== FILTER FIELDS =====
     private UUID salaryResultItemId; // Lọc theo chi tiết bảng lương nhân viên
     private UUID salaryTemplateItemId; // Lọc theo thành phần lương
+    private UUID staffId; // Lọc theo nhân viên
     private Double minValue; // Lọc theo giá trị tối thiểu
     private Double maxValue; // Lọc theo giá trị tối đa
 
@@ -22,6 +23,14 @@ public class SearchSalaryResultItemDetailDto extends SearchDto {
     }
 
     // ===== GETTERS & SETTERS =====
+
+    public UUID getStaffId() {
+        return staffId;
+    }
+
+    public void setStaffId(UUID staffId) {
+        this.staffId = staffId;
+    }
 
     public String getSortBy() {
         return sortBy;
