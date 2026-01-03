@@ -45,7 +45,7 @@ public class DataLoader implements CommandLineRunner {
 
         // Create demo users
         createUser("admin", "admin@company.com", "123456", adminRole);
-        createUser("manager", "manager@company.com", "123456", managerRole);
+        createUser("manager", "manager@company.com", "12345678", managerRole);
         createUser("hr", "hr@company.com", "123456", hrRole);
         createUser("employee", "employee@company.com", "123456", employeeRole);
 

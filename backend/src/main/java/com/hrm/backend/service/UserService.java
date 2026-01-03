@@ -29,4 +29,6 @@ public interface UserService {
     UserDto getCurrentUser();
 
     User getCurrentUserEntity();
+
+    UserDto updatePasswordUser(UserDto dto);
 }
