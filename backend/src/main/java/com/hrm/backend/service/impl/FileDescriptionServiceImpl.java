@@ -69,7 +69,7 @@ public class FileDescriptionServiceImpl implements FileDescriptionService {
                 entity.setContentSize(file.getSize());
                 entity.setContentType(file.getContentType());
 
-                entity = fileDescriptionRepository.save(entity);
+                entity = fileDescriptionRepository.saveAndFlush(entity);
                 return new FileDescriptionDto(entity);
             } catch (IOException e) {
                 throw new RuntimeException("Error while uploading file", e);

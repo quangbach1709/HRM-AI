@@ -9,7 +9,7 @@ import com.hrm.backend.repository.DepartmentRepository;
 import com.hrm.backend.service.DepartmentService;
 import com.hrm.backend.specification.DepartmentSpecification;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -22,13 +22,14 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class DepartmentServiceImpl implements DepartmentService {
 
-    @Autowired
-    private DepartmentRepository departmentRepository;
 
-    @Autowired
-    private DepartmentSpecification departmentSpecification;
+    private final DepartmentRepository departmentRepository;
+
+
+    private final DepartmentSpecification departmentSpecification;
 
     // ===== CRUD OPERATIONS =====
 
