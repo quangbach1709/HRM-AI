@@ -5,7 +5,8 @@ import com.hrm.backend.entity.FileDescription;
 import com.hrm.backend.repository.FileDescriptionRepository;
 import com.hrm.backend.service.FileDescriptionService;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class FileDescriptionServiceImpl implements FileDescriptionService {
 
     private final FileDescriptionRepository fileDescriptionRepository;
@@ -24,11 +26,7 @@ public class FileDescriptionServiceImpl implements FileDescriptionService {
         ? System.getProperty("user.dir").replace("\\", "/").replaceAll("/backend$", "/uploads/")
         : System.getProperty("user.dir").replace("\\", "/") + "/uploads/";
 
-    @Autowired
-    public FileDescriptionServiceImpl(FileDescriptionRepository fileDescriptionRepository) {
-        this.fileDescriptionRepository = fileDescriptionRepository;
-    }
-
+    
     @Override
     public void deleteById(UUID id) {
         FileDescription entity = fileDescriptionRepository.findById(id)
