@@ -81,7 +81,7 @@ public class FaceEmbeddingController {
     }
 
     // Delete (Soft delete)
-    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN })
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR })
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> delete(@PathVariable UUID id) {
         faceEmbeddingService.deleteById(id);

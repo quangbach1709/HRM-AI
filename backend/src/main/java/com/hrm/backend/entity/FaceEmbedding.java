@@ -1,11 +1,14 @@
 package com.hrm.backend.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
+
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "tbl_face_embedding")
+@Data
 public class FaceEmbedding extends AuditableEntity{
     // Liên kết với nhân viên (1 nhân viên có nhiều mẫu khuôn mặt)
     @ManyToOne(fetch = FetchType.LAZY)
@@ -23,7 +26,7 @@ public class FaceEmbedding extends AuditableEntity{
     @JoinColumn(name = "image_url_id")
     private FileDescription imageUrl;
 
-    // Trạng thái (Ví dụ: true là đang dùng, false là khuôn mặt cũ đã xóa)
+    // Trạng thái (Ví dụ: true là đang dùng, false là khuôn mặt chưa được duyệt)
     @Column(name = "is_active")
     private boolean isActive = true;
 
@@ -31,43 +34,4 @@ public class FaceEmbedding extends AuditableEntity{
     @Column(name = "model_version")
     private String modelVersion;
 
-    public Person getPerson() {
-        return person;
-    }
-
-    public void setPerson(Person person) {
-        this.person = person;
-    }
-
-    public double[] getEmbeddingVector() {
-        return embeddingVector;
-    }
-
-    public void setEmbeddingVector(double[] embeddingVector) {
-        this.embeddingVector = embeddingVector;
-    }
-
-    public FileDescription getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(FileDescription imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
-    public String getModelVersion() {
-        return modelVersion;
-    }
-
-    public void setModelVersion(String modelVersion) {
-        this.modelVersion = modelVersion;
-    }
 }

@@ -56,6 +56,9 @@ public class FaceEmbeddingSpecification extends BaseSpecification<FaceEmbedding>
                 predicates.add(cb.equal(root.get("id"), dto.getId()));
             }
 
+            // 6. Filter soft-deleted (voided)
+            predicates.add(cb.or(cb.isNull(root.get("voided")), cb.isFalse(root.get("voided"))));
+
             return andPredicates(cb, predicates);
         };
     }

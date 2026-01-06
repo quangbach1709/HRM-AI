@@ -3,6 +3,7 @@ package com.hrm.backend.repository;
 import com.hrm.backend.entity.FaceEmbedding;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,5 +15,6 @@ public interface FaceEmbeddingRepository
 
     List<FaceEmbedding> findByPersonId(UUID personId);
 
-    List<FaceEmbedding> findByPersonIdAndIsActiveTrue(UUID personId);
+    @Query("SELECT fe FROM FaceEmbedding fe WHERE fe.person.id = :personId AND fe.isActive = true AND (fe.voided = false OR fe.voided IS NULL)")
+    List<FaceEmbedding> findByPersonIdAndActiveTrue(UUID personId);
 }

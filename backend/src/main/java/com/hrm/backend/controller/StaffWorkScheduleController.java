@@ -8,9 +8,11 @@ import com.hrm.backend.service.StaffWorkScheduleService;
 import com.hrm.backend.utils.HRConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -85,9 +87,14 @@ public class StaffWorkScheduleController {
      * - If record exists and checkIn has value -> check-out
      */
     @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
-    @PostMapping("/attendance")
-    public ResponseEntity<StaffWorkScheduleDto> attendance(@RequestBody StaffWorkScheduleDto dto) {
-        return ResponseEntity.ok(service.attendance(dto));
+    @PostMapping(value = "/attendance", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<StaffWorkScheduleDto> attendance(
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            @RequestPart("data") StaffWorkScheduleDto dto) {
+        // If images are missing or empty, we might want to throw an error or handle it
+        // in service
+        // For now, service handles empty check.
+        return ResponseEntity.ok(service.attendance(dto, images));
     }
 
 }

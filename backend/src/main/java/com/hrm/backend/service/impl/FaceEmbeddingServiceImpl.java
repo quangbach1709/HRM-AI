@@ -107,7 +107,7 @@ public class FaceEmbeddingServiceImpl implements FaceEmbeddingService {
         entity.setModelVersion(dto.getModelVersion());
 
         FaceEmbedding saved = faceEmbeddingRepository.save(entity);
-        return new FaceEmbeddingDto(saved);
+        return new FaceEmbeddingDto(saved, true);
     }
 
     @Override
@@ -126,6 +126,7 @@ public class FaceEmbeddingServiceImpl implements FaceEmbeddingService {
 
         // Soft delete: set isActive = false
         entity.setActive(false);
+        entity.setVoided(true);
         faceEmbeddingRepository.save(entity);
     }
 
@@ -206,7 +207,7 @@ public class FaceEmbeddingServiceImpl implements FaceEmbeddingService {
 
         // Lấy danh sách các khuôn mặt đã đăng ký của nhân viên
         List<FaceEmbedding> registeredEmbeddings = faceEmbeddingRepository
-                .findByPersonIdAndIsActiveTrue(dto.getPerson().getId());
+                .findByPersonIdAndActiveTrue(dto.getPerson().getId());
         if (registeredEmbeddings.isEmpty()) {
             throw new IllegalArgumentException("Chưa có khuôn mặt đã đăng ký cho nhân viên này.");
         }

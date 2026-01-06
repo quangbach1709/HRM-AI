@@ -1,16 +1,17 @@
 package com.hrm.backend.service.impl;
 
+import com.hrm.backend.dto.AIFaceVerificationResponse;
 import com.hrm.backend.dto.StaffWorkScheduleDto;
 import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.dto.response.PageResponse;
 import com.hrm.backend.dto.search.SearchStaffWorkScheduleDto;
+import com.hrm.backend.dto.PersonDto;
+import com.hrm.backend.dto.FaceEmbeddingDto;
 import com.hrm.backend.entity.Staff;
 import com.hrm.backend.entity.StaffWorkSchedule;
 import com.hrm.backend.repository.StaffRepository;
 import com.hrm.backend.repository.StaffWorkScheduleRepository;
-import com.hrm.backend.service.StaffService;
-import com.hrm.backend.service.StaffWorkScheduleService;
-import com.hrm.backend.service.UserService;
+import com.hrm.backend.service.*;
 import com.hrm.backend.specification.StaffWorkScheduleSpecification;
 import com.hrm.backend.utils.HRConstants;
 import lombok.Data;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -36,6 +38,8 @@ public class StaffWorkScheduleServiceImpl implements StaffWorkScheduleService {
     private final StaffWorkScheduleSpecification specification;
     private final StaffRepository staffRepository;
     private final StaffService staffService;
+    private final FaceEmbeddingService faceEmbeddingService;
+    private final PersonService personService;
 
     // ==================== PAGINATION ====================
 
@@ -145,7 +149,45 @@ public class StaffWorkScheduleServiceImpl implements StaffWorkScheduleService {
      */
     @Override
     @Transactional
-    public StaffWorkScheduleDto attendance(StaffWorkScheduleDto dto) {
+    public StaffWorkScheduleDto attendance(StaffWorkScheduleDto dto, List<MultipartFile> frames) {
+
+        // --- FACE VERIFICATION LOGIC ---
+        if (frames == null || frames.isEmpty()) {
+            throw new IllegalArgumentException("Hình ảnh khuôn mặt là bắt buộc để chấm công.");
+        }
+
+        // 1. Call AI Service to check liveness and get embedding
+        AIFaceVerificationResponse aiResponse = faceEmbeddingService.callAIService(frames);
+
+        if (aiResponse.getStatus() != 200) {
+            throw new IllegalArgumentException("Lỗi xác thực khuôn mặt từ AI: " + aiResponse.getStatusDetail());
+        }
+
+        if (aiResponse.getEmbeddingVector() == null || aiResponse.getEmbeddingVector().isEmpty()) {
+            throw new IllegalArgumentException("Không tìm thấy dữ liệu khuôn mặt trong ảnh.");
+        }
+
+        // Convert List<Double> to double[]
+        double[] inputVector = aiResponse.getEmbeddingVector().stream()
+                .mapToDouble(Double::doubleValue)
+                .toArray();
+
+
+        PersonDto personDto = personService.getCurrentPerson();
+
+        FaceEmbeddingDto verificationDto = new FaceEmbeddingDto();
+        verificationDto.setPerson(personDto);
+        verificationDto.setEmbeddingVector(inputVector);
+
+        // 4. Verify against registered embeddings
+        // verifyFace throws IllegalArgumentException if mismatch or replay attack
+        boolean isVerified = faceEmbeddingService.verifyFace(verificationDto);
+
+        if (!isVerified) {
+            throw new IllegalArgumentException(
+                    "Xác thực khuôn mặt thất bại. Khuôn mặt không khớp với dữ liệu đã đăng ký.");
+        }
+        // --- END VERIFICATION ---
         if (dto.getStaffId() == null) {
             throw new IllegalArgumentException("Staff is required for attendance");
         }
@@ -170,7 +212,7 @@ public class StaffWorkScheduleServiceImpl implements StaffWorkScheduleService {
             entity = repository.saveAndFlush(entity);
             return new StaffWorkScheduleDto(entity, true);
 
-        } else if (staffWorkSchedule.getCheckIn() == null) {
+        } else if (staffWorkSchedule.getCheckIn() == null && staffWorkSchedule.getCheckOut() == null) {
             // Case 2: Record exists but checkIn is null -> HR pre-created, do check-in
             mapDtoToEntity(dto, staffWorkSchedule);
             staffWorkSchedule.setShiftWorkStatus(HRConstants.ShiftWorkStatus.CHECKED_IN.getValue());
@@ -181,7 +223,7 @@ public class StaffWorkScheduleServiceImpl implements StaffWorkScheduleService {
             staffWorkSchedule = repository.saveAndFlush(staffWorkSchedule);
             return new StaffWorkScheduleDto(staffWorkSchedule, true);
 
-        } else {
+        } else if (staffWorkSchedule.getCheckOut() == null && staffWorkSchedule.getCheckIn() != null) {
             // Case 3: Record exists and checkIn has value -> Do check-out
             dto.setCheckIn(staffWorkSchedule.getCheckIn());
             mapDtoToEntity(dto, staffWorkSchedule);
@@ -208,7 +250,11 @@ public class StaffWorkScheduleServiceImpl implements StaffWorkScheduleService {
 
             staffWorkSchedule = repository.saveAndFlush(staffWorkSchedule);
             return new StaffWorkScheduleDto(staffWorkSchedule, true);
+        } else if (staffWorkSchedule.getCheckIn() != null && staffWorkSchedule.getCheckOut() != null) {
+            // Already checked out
+            throw new IllegalArgumentException("Nhân viên đã chấm công ra vào trong ngày hôm nay.");
         }
+        throw new IllegalArgumentException("Lỗi không xác định trong quá trình chấm công.");
     }
 
     // ==================== HELPERS ====================

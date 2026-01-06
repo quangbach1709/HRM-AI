@@ -4,6 +4,7 @@ import com.hrm.backend.dto.StaffWorkScheduleDto;
 import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.dto.response.PageResponse;
 import com.hrm.backend.dto.search.SearchStaffWorkScheduleDto;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -34,5 +35,5 @@ public interface StaffWorkScheduleService {
      * - If exists but checkIn is null -> HR pre-created record, do check-in
      * - If exists and checkIn has value -> Do check-out
      */
-    StaffWorkScheduleDto attendance(StaffWorkScheduleDto dto);
+    StaffWorkScheduleDto attendance(StaffWorkScheduleDto dto, List<MultipartFile> frames);
 }
