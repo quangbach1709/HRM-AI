@@ -2,6 +2,7 @@ package com.hrm.backend.service;
 
 import com.hrm.backend.entity.mongo.DashboardStatDoc;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,4 +62,6 @@ public interface DashboardStatService {
 
     /** Giảm số ca chấm công đủ */
     void decrementCompletedAttendance(String monthKey);
+
+    String generateMonthKey(LocalDateTime dateTime);
 }

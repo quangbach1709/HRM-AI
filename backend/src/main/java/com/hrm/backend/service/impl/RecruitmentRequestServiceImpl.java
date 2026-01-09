@@ -1,7 +1,6 @@
 package com.hrm.backend.service.impl;
 
 import com.hrm.backend.dto.RecruitmentRequestDto;
-import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.dto.response.PageResponse;
 import com.hrm.backend.dto.search.SearchRecruitmentRequestDto;
 import com.hrm.backend.entity.Position;
@@ -10,6 +9,7 @@ import com.hrm.backend.entity.Staff;
 import com.hrm.backend.repository.PositionRepository;
 import com.hrm.backend.repository.RecruitmentRequestRepository;
 import com.hrm.backend.repository.StaffRepository;
+import com.hrm.backend.service.DashboardStatService;
 import com.hrm.backend.service.RecruitmentRequestService;
 import com.hrm.backend.specification.RecruitmentRequestSpecification;
 import jakarta.persistence.EntityNotFoundException;
@@ -37,6 +37,7 @@ public class RecruitmentRequestServiceImpl implements RecruitmentRequestService 
     private final RecruitmentRequestSpecification specification;
     private final StaffRepository staffRepository;
     private final PositionRepository positionRepository;
+    private final DashboardStatService dashboardStatService;
 
     @Override
     public PageResponse<RecruitmentRequestDto> search(SearchRecruitmentRequestDto dto) {
@@ -93,6 +94,7 @@ public class RecruitmentRequestServiceImpl implements RecruitmentRequestService 
         entity.setVoided(false);
 
         entity = repository.save(entity);
+        dashboardStatService.incrementOpenPositions(dashboardStatService.generateMonthKey(LocalDateTime.now()));
         return new RecruitmentRequestDto(entity, true);
     }
 
@@ -120,6 +122,8 @@ public class RecruitmentRequestServiceImpl implements RecruitmentRequestService 
         entity.setVoided(true);
         entity.setUpdatedAt(LocalDateTime.now());
         repository.save(entity);
+        dashboardStatService.decrementOpenPositions(dashboardStatService
+                .generateMonthKey(LocalDateTime.now()));
     }
 
     @Override

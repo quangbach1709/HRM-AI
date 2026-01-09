@@ -1,6 +1,5 @@
 package com.hrm.backend.service.impl;
 
-import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.dto.StaffDto;
 import com.hrm.backend.dto.response.PageResponse;
 import com.hrm.backend.dto.search.SearchStaffDto;
@@ -9,6 +8,7 @@ import com.hrm.backend.entity.Staff;
 import com.hrm.backend.entity.User;
 import com.hrm.backend.repository.SalaryTemplateRepository;
 import com.hrm.backend.repository.StaffRepository;
+import com.hrm.backend.service.DashboardStatService;
 import com.hrm.backend.service.StaffService;
 import com.hrm.backend.service.UserService;
 import com.hrm.backend.specification.StaffSpecification;
@@ -25,7 +25,6 @@ import jakarta.persistence.EntityNotFoundException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -40,6 +39,7 @@ public class StaffServiceImpl implements StaffService {
     private final StaffSpecification specification;
     private final SalaryTemplateRepository salaryTemplateRepository;
     private final UserService userService;
+    private final DashboardStatService dashboardStatService;
 
     @Override
     public PageResponse<StaffDto> search(SearchStaffDto dto) {
@@ -85,6 +85,8 @@ public class StaffServiceImpl implements StaffService {
         entity.setVoided(false);
 
         entity = repository.save(entity);
+        dashboardStatService.incrementTotalEmployees(
+                dashboardStatService.generateMonthKey(LocalDateTime.now()));
         return new StaffDto(entity, true);
     }
 
@@ -112,6 +114,8 @@ public class StaffServiceImpl implements StaffService {
         entity.setVoided(true);
         entity.setUpdatedAt(LocalDateTime.now());
         repository.save(entity);
+        dashboardStatService.decrementTotalEmployees(
+                dashboardStatService.generateMonthKey(LocalDateTime.now()));
     }
 
     @Override

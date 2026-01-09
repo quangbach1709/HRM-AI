@@ -10,6 +10,9 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -106,6 +109,12 @@ public class DashboardStatServiceImpl implements DashboardStatService {
     @Override
     public void decrementCompletedAttendance(String monthKey) {
         atomicIncrement(monthKey, "hr_stats.completed_attendance", -1L);
+    }
+
+    @Override
+    public String generateMonthKey(LocalDateTime dateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-yyyy");
+        return dateTime.format(formatter);
     }
 
     // ========== Private Helper Methods ==========

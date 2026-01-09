@@ -2,7 +2,7 @@ package com.hrm.backend.service.impl;
 
 import com.hrm.backend.dto.AIFaceVerificationResponse;
 import com.hrm.backend.dto.StaffWorkScheduleDto;
-import com.hrm.backend.dto.search.SearchDto;
+
 import com.hrm.backend.dto.response.PageResponse;
 import com.hrm.backend.dto.search.SearchStaffWorkScheduleDto;
 import com.hrm.backend.dto.PersonDto;
@@ -14,13 +14,13 @@ import com.hrm.backend.repository.StaffWorkScheduleRepository;
 import com.hrm.backend.service.*;
 import com.hrm.backend.specification.StaffWorkScheduleSpecification;
 import com.hrm.backend.utils.HRConstants;
-import lombok.Data;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
+
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,6 +40,7 @@ public class StaffWorkScheduleServiceImpl implements StaffWorkScheduleService {
     private final StaffService staffService;
     private final FaceEmbeddingService faceEmbeddingService;
     private final PersonService personService;
+    private final DashboardStatService dashboardStatService;
 
     // ==================== PAGINATION ====================
 
@@ -90,6 +91,11 @@ public class StaffWorkScheduleServiceImpl implements StaffWorkScheduleService {
         entity.setVoided(false);
 
         entity = repository.save(entity);
+        if (Objects.equals(entity.getShiftWorkStatus(), HRConstants.ShiftWorkStatus.WORKED_FULL_HOURS.getValue())){
+            dashboardStatService.incrementCompletedAttendance(
+                    dashboardStatService.generateMonthKey(LocalDateTime.now())
+            );
+        }
         return new StaffWorkScheduleDto(entity, true);
     }
 
@@ -101,6 +107,7 @@ public class StaffWorkScheduleServiceImpl implements StaffWorkScheduleService {
         StaffWorkSchedule entity = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("StaffWorkSchedule not found: " + id));
 
+        Integer oldValueShiftWorkStatus = entity.getShiftWorkStatus();
         validateForUpdate(dto, entity);
 
         mapDtoToEntity(dto, entity);
@@ -108,6 +115,16 @@ public class StaffWorkScheduleServiceImpl implements StaffWorkScheduleService {
         entity.setUpdatedAt(LocalDateTime.now());
 
         entity = repository.save(entity);
+        if (Objects.equals(entity.getShiftWorkStatus(), HRConstants.ShiftWorkStatus.WORKED_FULL_HOURS.getValue())){
+            dashboardStatService.incrementCompletedAttendance(
+                    dashboardStatService.generateMonthKey(LocalDateTime.now())
+            );
+        } else if (oldValueShiftWorkStatus != null && !oldValueShiftWorkStatus.equals(HRConstants.ShiftWorkStatus.WORKED_FULL_HOURS.getValue())
+                && !Objects.equals(entity.getShiftWorkStatus(), HRConstants.ShiftWorkStatus.WORKED_FULL_HOURS.getValue())){
+            dashboardStatService.decrementCompletedAttendance(
+                    dashboardStatService.generateMonthKey(LocalDateTime.now())
+            );
+        }
         return new StaffWorkScheduleDto(entity, true);
     }
 
@@ -249,6 +266,11 @@ public class StaffWorkScheduleServiceImpl implements StaffWorkScheduleService {
             staffWorkSchedule.setUpdatedAt(LocalDateTime.now());
 
             staffWorkSchedule = repository.saveAndFlush(staffWorkSchedule);
+            if (Objects.equals(staffWorkSchedule.getShiftWorkStatus(), HRConstants.ShiftWorkStatus.WORKED_FULL_HOURS.getValue())){
+                dashboardStatService.incrementCompletedAttendance(
+                        dashboardStatService.generateMonthKey(LocalDateTime.now())
+                );
+            }
             return new StaffWorkScheduleDto(staffWorkSchedule, true);
         } else if (staffWorkSchedule.getCheckIn() != null && staffWorkSchedule.getCheckOut() != null) {
             // Already checked out

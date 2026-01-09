@@ -6,6 +6,7 @@ import com.hrm.backend.dto.search.SearchDepartmentDto;
 import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.entity.Department;
 import com.hrm.backend.repository.DepartmentRepository;
+import com.hrm.backend.service.DashboardStatService;
 import com.hrm.backend.service.DepartmentService;
 import com.hrm.backend.specification.DepartmentSpecification;
 import jakarta.persistence.EntityNotFoundException;
@@ -16,6 +17,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -30,6 +32,8 @@ public class DepartmentServiceImpl implements DepartmentService {
 
 
     private final DepartmentSpecification departmentSpecification;
+
+    private final DashboardStatService dashboardStatService;
 
     // ===== CRUD OPERATIONS =====
 
@@ -56,6 +60,8 @@ public class DepartmentServiceImpl implements DepartmentService {
         } else {
             // Create new
             entity = new Department();
+            dashboardStatService.incrementTotalDepartments(dashboardStatService
+                    .generateMonthKey(LocalDateTime.now()));
             entity.setVoided(false);
 
             // Validate code uniqueness
@@ -122,6 +128,8 @@ public class DepartmentServiceImpl implements DepartmentService {
         // Then soft delete this department
         department.setVoided(true);
         departmentRepository.save(department);
+        dashboardStatService.decrementTotalDepartments(dashboardStatService
+                .generateMonthKey(LocalDateTime.now()));
     }
 
     // ===== SEARCH WITH SPECIFICATION =====
