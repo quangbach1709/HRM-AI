@@ -1,11 +1,11 @@
 package com.hrm.backend.service.impl;
 
 import com.hrm.backend.dto.SalaryTemplateDto;
-import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.dto.response.PageResponse;
 import com.hrm.backend.dto.search.SearchSalaryTemplateDto;
 import com.hrm.backend.entity.SalaryTemplate;
 import com.hrm.backend.repository.SalaryTemplateRepository;
+import com.hrm.backend.service.DashboardStatService;
 import com.hrm.backend.service.SalaryTemplateService;
 import com.hrm.backend.specification.SalaryTemplateSpecification;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +27,10 @@ import java.util.stream.Collectors;
 public class SalaryTemplateServiceImpl implements SalaryTemplateService {
 
     private final SalaryTemplateRepository repository;
+
     private final SalaryTemplateSpecification specification;
 
+    private final DashboardStatService dashboardStatService;
     // ==================== PAGINATION ====================
 
     @Override
@@ -80,6 +82,7 @@ public class SalaryTemplateServiceImpl implements SalaryTemplateService {
         entity.setVoided(false);
 
         entity = repository.save(entity);
+        dashboardStatService.incrementTotalSalaryTemplates(dashboardStatService.generateMonthKey(LocalDateTime.now()));
         return new SalaryTemplateDto(entity, false);
     }
 
@@ -109,6 +112,8 @@ public class SalaryTemplateServiceImpl implements SalaryTemplateService {
         entity.setVoided(true);
         entity.setUpdatedAt(LocalDateTime.now());
         repository.save(entity);
+        dashboardStatService.decrementTotalSalaryTemplates(dashboardStatService
+                .generateMonthKey(LocalDateTime.now()));
     }
 
     // ==================== EXPORT ====================

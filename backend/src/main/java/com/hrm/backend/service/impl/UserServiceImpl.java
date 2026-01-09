@@ -11,6 +11,7 @@ import com.hrm.backend.entity.Person;
 import com.hrm.backend.repository.UserRepository;
 import com.hrm.backend.repository.RoleRepository;
 import com.hrm.backend.repository.PersonRepository;
+import com.hrm.backend.service.DashboardStatService;
 import com.hrm.backend.service.UserService;
 import com.hrm.backend.specification.UserSpecification;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +45,7 @@ public class UserServiceImpl implements UserService {
     private final UserSpecification specification;
     private final PasswordEncoder passwordEncoder;
     private final EntityManager entityManager;
+    private final DashboardStatService dashboardStatService;
 
     @Override
     public PageResponse<UserDto> search(SearchUserDto dto) {
@@ -94,6 +96,7 @@ public class UserServiceImpl implements UserService {
         }
 
         entity = repository.save(entity);
+        dashboardStatService.incrementTotalUsers(dashboardStatService.generateMonthKey(LocalDateTime.now()));
         return new UserDto(entity);
     }
 
@@ -124,6 +127,7 @@ public class UserServiceImpl implements UserService {
         entity.setVoided(true);
         entity.setUpdatedAt(LocalDateTime.now());
         repository.save(entity);
+        dashboardStatService.decrementTotalUsers(dashboardStatService.generateMonthKey(LocalDateTime.now()));
     }
 
     @Override
