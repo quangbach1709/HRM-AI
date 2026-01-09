@@ -4,6 +4,7 @@ import com.hrm.backend.entity.mongo.DashboardStatDoc;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -12,6 +13,24 @@ import java.util.Optional;
  * Thống kê được chia theo quyền: Admin, Manager, HR.
  */
 public interface DashboardStatService {
+
+    // ========== Sync & Query ==========
+
+    /**
+     * Đồng bộ dữ liệu từ PostgreSQL sang MongoDB cho tháng được chỉ định.
+     * 
+     * @param monthKey tháng cần đồng bộ (định dạng MM-yyyy)
+     * @return Map chứa các thống kê đã được đồng bộ
+     */
+    Map<String, Object> syncStats(String monthKey);
+
+    /**
+     * Lấy thống kê theo tháng.
+     * 
+     * @param monthKey tháng cần lấy (định dạng MM-yyyy)
+     * @return Optional chứa DashboardStatDoc hoặc empty nếu không có
+     */
+    Optional<DashboardStatDoc> getStatsByMonth(String monthKey);
 
     // ========== Basic CRUD ==========
 
@@ -64,4 +83,11 @@ public interface DashboardStatService {
     void decrementCompletedAttendance(String monthKey);
 
     String generateMonthKey(LocalDateTime dateTime);
+
+    /**
+     * Lấy monthKey của tháng hiện tại.
+     * 
+     * @return monthKey định dạng MM-yyyy
+     */
+    String getCurrentMonthKey();
 }
