@@ -1,0 +1,53 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Node
+node_modules
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+dist
+build
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+*.egg-info/
+.pytest_cache/
+.coverage
+
+# Maven
+target/
+.m2/
+
+# IDEs
+.idea
+.vscode
+*.swp
+*.swo
+.DS_Store
+*.iml
+
+# Logs
+logs/
+*.log
+
+# Docker
+.docker
+docker-compose.override.yml
+Dockerfile.dev
+
+# Others
+.env.local
+.env.*.local
+uploads/
+*.pid
