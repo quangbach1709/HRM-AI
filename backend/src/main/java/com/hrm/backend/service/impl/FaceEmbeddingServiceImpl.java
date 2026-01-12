@@ -1,5 +1,6 @@
 package com.hrm.backend.service.impl;
 
+import com.hrm.backend.config.SystemConfigLoader;
 import com.hrm.backend.dto.AIFaceVerificationResponse;
 import com.hrm.backend.dto.FaceEmbeddingDto;
 import com.hrm.backend.dto.FileDescriptionDto;
@@ -38,6 +39,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -64,7 +66,7 @@ public class FaceEmbeddingServiceImpl implements FaceEmbeddingService {
     private String aiServiceUrl;
 
     // Ngưỡng tối thiểu để xác định khuôn mặt khớp
-    private static final double SIMILARITY_THRESHOLD = 0.6;
+    private static double SIMILARITY_THRESHOLD = 0.6;
     // Ngưỡng phát hiện gian lận (replay attack) - nếu giống quá 99% thì coi là dùng
     // lại ảnh cũ
     private static final double REPLAY_ATTACK_THRESHOLD = 0.99;
@@ -199,6 +201,14 @@ public class FaceEmbeddingServiceImpl implements FaceEmbeddingService {
 
     @Override
     public Boolean verifyFace(FaceEmbeddingDto dto) {
+        if (SystemConfigLoader.getConfig("FACE_SIMILARITY_THRESHOLD") != null) {
+            double configThreshold = Double.parseDouble(Objects.requireNonNull(SystemConfigLoader.getValue("FACE_SIMILARITY_THRESHOLD")));
+            if (configThreshold >= 0.0 && configThreshold <= 1.0) {
+                // Cập nhật ngưỡng từ cấu hình hệ thống
+                SIMILARITY_THRESHOLD = configThreshold;
+            }
+        }
+
         // Lấy vector đầu vào từ ảnh vừa chụp
         double[] inputVector = dto.getEmbeddingVector();
         if (inputVector == null || inputVector.length == 0) {
