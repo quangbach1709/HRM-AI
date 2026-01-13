@@ -44,6 +44,12 @@ public class SalaryResultItemDetailSpecification extends BaseSpecification<Salar
                 predicates.add(cb.equal(root.get("salaryResultItem").get("staff").get("id"), dto.getStaffId()));
             }
 
+            // Filter by SalaryPeriod
+            if (dto.getSalaryPeriodId() != null) {
+                predicates.add(cb.equal(root.get("salaryResultItem").get("salaryResult").get("salaryPeriod").get("id"),
+                        dto.getSalaryPeriodId()));
+            }
+
             // Filter by value range
             if (dto.getMinValue() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("value"), dto.getMinValue()));

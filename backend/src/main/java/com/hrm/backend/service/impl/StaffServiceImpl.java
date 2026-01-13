@@ -186,6 +186,14 @@ public class StaffServiceImpl implements StaffService {
         if (repository.existsByStaffCode(dto.getStaffCode())) {
             throw new IllegalArgumentException("Staff code already exists: " + dto.getStaffCode());
         }
+        if (dto.getEmail() == null || !StringUtils.hasText(dto.getEmail())) {
+            throw new IllegalArgumentException("Email is required");
+        }
+
+        if (repository.existsByEmail(dto.getEmail())) {
+            throw new IllegalArgumentException("Email already exists: " + dto.getEmail());
+        }
+
         if (!StringUtils.hasText(dto.getDisplayName())) {
             throw new IllegalArgumentException("Display name is required");
         }
@@ -196,6 +204,12 @@ public class StaffServiceImpl implements StaffService {
                 !dto.getStaffCode().equals(existing.getStaffCode()) &&
                 repository.existsByStaffCode(dto.getStaffCode())) {
             throw new IllegalArgumentException("Staff code already exists: " + dto.getStaffCode());
+        }
+
+        if (StringUtils.hasText(dto.getEmail()) &&
+                !dto.getEmail().equals(existing.getEmail()) &&
+                repository.existsByEmail(dto.getEmail())) {
+            throw new IllegalArgumentException("Email already exists: " + dto.getEmail());
         }
     }
 

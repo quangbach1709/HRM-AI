@@ -18,10 +18,14 @@ public interface StaffRepository extends JpaRepository<Staff, UUID>, JpaSpecific
 
     boolean existsByStaffCode(String staffCode);
 
+    boolean existsByEmail(String email);
+
     boolean existsByStaffCodeAndIdNot(String staffCode, UUID id);
 
     Optional<Staff> findByStaffCode(String staffCode);
 
     @Query("SELECT s.staffCode FROM Staff s WHERE s.staffCode LIKE CONCAT(:prefix, '%')")
     List<String> findStaffCodesStartingWith(@Param("prefix") String prefix);
+
+    List<Staff> findAllByVoidedFalse();
 }

@@ -16,6 +16,7 @@ public class SearchSalaryResultItemDetailDto extends SearchDto {
     private UUID salaryResultItemId; // Lọc theo chi tiết bảng lương nhân viên
     private UUID salaryTemplateItemId; // Lọc theo thành phần lương
     private UUID staffId; // Lọc theo nhân viên
+    private UUID salaryPeriodId; // Lọc theo kỳ lương
     private Double minValue; // Lọc theo giá trị tối thiểu
     private Double maxValue; // Lọc theo giá trị tối đa
 
@@ -78,6 +79,14 @@ public class SearchSalaryResultItemDetailDto extends SearchDto {
 
     public void setMaxValue(Double maxValue) {
         this.maxValue = maxValue;
+    }
+
+    public UUID getSalaryPeriodId() {
+        return salaryPeriodId;
+    }
+
+    public void setSalaryPeriodId(UUID salaryPeriodId) {
+        this.salaryPeriodId = salaryPeriodId;
     }
 
     /**
