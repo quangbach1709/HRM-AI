@@ -2,6 +2,16 @@
 backend/src/main/resources/application.properties
 backend/src/main/resources/application-*.properties
 
+# Environment files (contains passwords)
+.env
+.env.*
+!.env.example
+
+# Docker compose (may contain secrets)
+docker-compose.yml
+docker-compose.*.yml
+!docker-compose.example.yml
+
 # IDE files
 .idea/
 *.iml
