@@ -1,5 +1,4 @@
-﻿# Ignore sensitive config files
-backend/src/main/resources/application.properties
+﻿# Ignore sensitive config files (application-docker.properties may contain hardcoded values)
 backend/src/main/resources/application-*.properties
 
 # Environment files (contains passwords)
