@@ -1,0 +1,14 @@
+﻿# Ignore sensitive config files
+backend/src/main/resources/application.properties
+backend/src/main/resources/application-*.properties
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+
+# Build outputs
+target/
+node_modules/
+build/
+dist/
