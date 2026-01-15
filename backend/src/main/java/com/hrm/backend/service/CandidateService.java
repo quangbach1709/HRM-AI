@@ -25,4 +25,15 @@ public interface CandidateService {
     List<CandidateDto> getAll();
 
     List<CandidateDto> exportToExcel(SearchCandidateDto dto);
+
+    // Public operations (no score update allowed)
+    CandidateDto publicCreate(CandidateDto dto);
+
+    CandidateDto publicUpdate(UUID id, CandidateDto dto);
+
+    // HR only - update score
+    CandidateDto updateScore(UUID id, Double score);
+
+    // Find by candidateCode and phoneNumber for public edit verification
+    CandidateDto findByCandidateCodeAndPhone(String candidateCode, String phoneNumber);
 }

@@ -42,14 +42,21 @@ public class Candidate extends Person {
     private Staff staff;
 
     @Column(name = "candidate_status")
-    private Integer candidateStatus; //Xem status: DatnConstants.CandidateStatus
+    private Integer candidateStatus; // Xem status: DatnConstants.CandidateStatus
 
     @Column(name = "work_experience", columnDefinition = "TEXT")
     private String workExperience; // kinh nghiem của ứng viên
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recruitment_request_id")
-    private RecruitmentRequest recruitmentRequest; //yêu cầu tuyển dụng nào
+    private RecruitmentRequest recruitmentRequest; // yêu cầu tuyển dụng nào
+
+    @JoinColumn(name = "cv_file_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    private FileDescription cvFile;
+
+    @Column(name = "score")
+    private Double score; // Điểm đánh giá của HR (0-100)
 
     public Candidate() {
         super();
@@ -149,5 +156,21 @@ public class Candidate extends Person {
 
     public void setCandidateCode(String candidateCode) {
         this.candidateCode = candidateCode;
+    }
+
+    public FileDescription getCvFile() {
+        return cvFile;
+    }
+
+    public void setCvFile(FileDescription cvFile) {
+        this.cvFile = cvFile;
+    }
+
+    public Double getScore() {
+        return score;
+    }
+
+    public void setScore(Double score) {
+        this.score = score;
     }
 }

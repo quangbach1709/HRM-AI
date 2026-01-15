@@ -5,10 +5,12 @@ import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.dto.response.PageResponse;
 import com.hrm.backend.dto.search.SearchCandidateDto;
 import com.hrm.backend.entity.Candidate;
+import com.hrm.backend.entity.FileDescription;
 import com.hrm.backend.entity.Position;
 import com.hrm.backend.entity.RecruitmentRequest;
 import com.hrm.backend.entity.Staff;
 import com.hrm.backend.repository.CandidateRepository;
+import com.hrm.backend.repository.FileDescriptionRepository;
 import com.hrm.backend.repository.PositionRepository;
 import com.hrm.backend.repository.RecruitmentRequestRepository;
 import com.hrm.backend.repository.StaffRepository;
@@ -40,6 +42,7 @@ public class CandidateServiceImpl implements CandidateService {
     private final PositionRepository positionRepository;
     private final StaffRepository staffRepository;
     private final RecruitmentRequestRepository recruitmentRequestRepository;
+    private final FileDescriptionRepository fileDescriptionRepository;
 
     @Override
     public PageResponse<CandidateDto> search(SearchCandidateDto dto) {
@@ -200,6 +203,13 @@ public class CandidateServiceImpl implements CandidateService {
                     .orElseThrow(() -> new EntityNotFoundException("Recruitment Request not found"));
             entity.setRecruitmentRequest(request);
         }
+
+        // Handle CV file
+        if (dto.getCvFile() != null && dto.getCvFile().getId() != null) {
+            FileDescription cvFile = fileDescriptionRepository.findById(dto.getCvFile().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("CV file not found"));
+            entity.setCvFile(cvFile);
+        }
     }
 
     private void validateForCreate(CandidateDto dto) {
@@ -219,6 +229,148 @@ public class CandidateServiceImpl implements CandidateService {
                 !dto.getCandidateCode().equals(existing.getCandidateCode()) &&
                 repository.existsByCandidateCode(dto.getCandidateCode())) {
             throw new IllegalArgumentException("Candidate code already exists: " + dto.getCandidateCode());
+        }
+    }
+
+    // ============ PUBLIC OPERATIONS (NO SCORE UPDATE) ============
+
+    @Override
+    @Transactional
+    public CandidateDto publicCreate(CandidateDto dto) {
+        // Auto-generate candidateCode if not provided
+        if (!StringUtils.hasText(dto.getCandidateCode())) {
+            dto.setCandidateCode(generateCandidateCode());
+        }
+
+        validateForCreate(dto);
+
+        Candidate entity = new Candidate();
+        mapDtoToEntityPublic(dto, entity); // Use public mapper - no score update
+
+        entity.setCreatedAt(LocalDateTime.now());
+        entity.setVoided(false);
+        entity.setCandidateStatus(0); // CREATED status
+
+        entity = repository.save(entity);
+        return new CandidateDto(entity, true);
+    }
+
+    @Override
+    @Transactional
+    public CandidateDto publicUpdate(UUID id, CandidateDto dto) {
+        Candidate entity = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Candidate not found: " + id));
+
+        validateForUpdate(dto, entity);
+
+        mapDtoToEntityPublic(dto, entity); // Use public mapper - no score update
+        entity.setUpdatedAt(LocalDateTime.now());
+
+        entity = repository.save(entity);
+        return new CandidateDto(entity, true);
+    }
+
+    @Override
+    @Transactional
+    public CandidateDto updateScore(UUID id, Double score) {
+        Candidate entity = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Candidate not found: " + id));
+
+        if (score != null && (score < 0 || score > 100)) {
+            throw new IllegalArgumentException("Score must be between 0 and 100");
+        }
+
+        entity.setScore(score);
+        entity.setUpdatedAt(LocalDateTime.now());
+
+        entity = repository.save(entity);
+        return new CandidateDto(entity, true);
+    }
+
+    @Override
+    public CandidateDto findByCandidateCodeAndPhone(String candidateCode, String phoneNumber) {
+        return repository.findByCandidateCodeAndPhoneNumber(candidateCode, phoneNumber)
+                .map(e -> new CandidateDto(e, true))
+                .orElse(null);
+    }
+
+    // ============ PRIVATE HELPERS ============
+
+    private String generateCandidateCode() {
+        String prefix = "CAND-"
+                + java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")) + "-";
+        int counter = 1;
+        String code;
+        do {
+            code = prefix + String.format("%04d", counter++);
+        } while (repository.existsByCandidateCode(code));
+        return code;
+    }
+
+    /**
+     * Map DTO to entity for public operations (no score update allowed)
+     */
+    private void mapDtoToEntityPublic(CandidateDto dto, Candidate entity) {
+        // Person fields
+        if (StringUtils.hasText(dto.getFirstName()))
+            entity.setFirstName(dto.getFirstName());
+        if (StringUtils.hasText(dto.getLastName()))
+            entity.setLastName(dto.getLastName());
+        if (StringUtils.hasText(dto.getDisplayName()))
+            entity.setDisplayName(dto.getDisplayName());
+        if (dto.getBirthDate() != null)
+            entity.setBirthDate(dto.getBirthDate());
+        if (StringUtils.hasText(dto.getBirthPlace()))
+            entity.setBirthPlace(dto.getBirthPlace());
+        if (dto.getGender() != null)
+            entity.setGender(dto.getGender());
+        if (StringUtils.hasText(dto.getPhoneNumber()))
+            entity.setPhoneNumber(dto.getPhoneNumber());
+        if (StringUtils.hasText(dto.getIdNumber()))
+            entity.setIdNumber(dto.getIdNumber());
+        if (StringUtils.hasText(dto.getIdNumberIssueBy()))
+            entity.setIdNumberIssueBy(dto.getIdNumberIssueBy());
+        if (dto.getIdNumberIssueDate() != null)
+            entity.setIdNumberIssueDate(dto.getIdNumberIssueDate());
+        if (StringUtils.hasText(dto.getEmail()))
+            entity.setEmail(dto.getEmail());
+        if (dto.getMaritalStatus() != null)
+            entity.setMaritalStatus(dto.getMaritalStatus());
+        if (StringUtils.hasText(dto.getTaxCode()))
+            entity.setTaxCode(dto.getTaxCode());
+        if (dto.getEducationLevel() != null)
+            entity.setEducationLevel(dto.getEducationLevel());
+
+        // Candidate specific fields (NO SCORE!)
+        if (StringUtils.hasText(dto.getCandidateCode()))
+            entity.setCandidateCode(dto.getCandidateCode());
+        if (dto.getSubmissionDate() != null)
+            entity.setSubmissionDate(dto.getSubmissionDate());
+        if (dto.getDesiredPay() != null)
+            entity.setDesiredPay(dto.getDesiredPay());
+        if (dto.getPossibleWorkingDate() != null)
+            entity.setPossibleWorkingDate(dto.getPossibleWorkingDate());
+        if (StringUtils.hasText(dto.getWorkExperience()))
+            entity.setWorkExperience(dto.getWorkExperience());
+
+        // Relations
+        if (dto.getPosition() != null && dto.getPosition().getId() != null) {
+            Position position = positionRepository.findById(dto.getPosition().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Position not found"));
+            entity.setPosition(position);
+        }
+
+        if (dto.getRecruitmentRequest() != null && dto.getRecruitmentRequest().getId() != null) {
+            RecruitmentRequest request = recruitmentRequestRepository.findById(dto.getRecruitmentRequest().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Recruitment Request not found"));
+            entity.setRecruitmentRequest(request);
+        }
+
+        // Handle CV file for public submissions
+        if (dto.getCvFile() != null && dto.getCvFile().getId() != null) {
+            FileDescription cvFile = fileDescriptionRepository.findById(dto.getCvFile().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("CV file not found"));
+            entity.setCvFile(cvFile);
         }
     }
 }

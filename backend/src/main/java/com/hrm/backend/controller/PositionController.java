@@ -84,7 +84,6 @@ public class PositionController {
     }
 
     // GET /api/positions/all - Lấy tất cả
-    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
     @GetMapping("/all")
     public ResponseEntity<List<PositionDto>> getAllPositions() {
         List<PositionDto> positions = positionService.getAllPositions();

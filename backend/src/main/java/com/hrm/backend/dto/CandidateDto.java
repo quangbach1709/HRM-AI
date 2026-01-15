@@ -1,6 +1,5 @@
 package com.hrm.backend.dto;
 
-
 import com.hrm.backend.entity.Candidate;
 import jakarta.validation.Valid;
 
@@ -18,9 +17,11 @@ public class CandidateDto extends PersonDto {
     private Date onboardDate; // Ngày ứng viên nhận việc
     private StaffDto introducer; // Nhân viên giới thiệu ứng viên
     private StaffDto staff;
-    private Integer candidateStatus; //Xem status: DatnConstants.CandidateStatus
+    private Integer candidateStatus; // Xem status: DatnConstants.CandidateStatus
     private String workExperience; // kinh nghiem của ứng viên
-    private RecruitmentRequestDto recruitmentRequest; //yêu cầu tuyển dụng nào
+    private RecruitmentRequestDto recruitmentRequest; // yêu cầu tuyển dụng nào
+    private FileDescriptionDto cvFile;
+    private Double score; // Điểm đánh giá của HR (0-100)
 
     public CandidateDto() {
         super();
@@ -49,7 +50,11 @@ public class CandidateDto extends PersonDto {
             if (entity.getRecruitmentRequest() != null) {
                 this.recruitmentRequest = new RecruitmentRequestDto(entity.getRecruitmentRequest(), false);
             }
+            this.score = entity.getScore();
             if (isGetFull) {
+                if (entity.getCvFile() != null) {
+                    this.cvFile = new FileDescriptionDto(entity.getCvFile());
+                }
             }
         }
     }
@@ -148,5 +153,21 @@ public class CandidateDto extends PersonDto {
 
     public void setRecruitmentRequest(RecruitmentRequestDto recruitmentRequest) {
         this.recruitmentRequest = recruitmentRequest;
+    }
+
+    public FileDescriptionDto getCvFile() {
+        return cvFile;
+    }
+
+    public void setCvFile(FileDescriptionDto cvFile) {
+        this.cvFile = cvFile;
+    }
+
+    public Double getScore() {
+        return score;
+    }
+
+    public void setScore(Double score) {
+        this.score = score;
     }
 }

@@ -67,6 +67,14 @@ public class CandidateController {
         return ResponseEntity.ok(response);
     }
 
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR })
+    @PutMapping("/{id}/score")
+    public ResponseEntity<CandidateDto> updateScore(@PathVariable UUID id, @RequestBody Map<String, Double> request) {
+        Double score = request.get("score");
+        CandidateDto updated = service.updateScore(id, score);
+        return ResponseEntity.ok(updated);
+    }
+
     @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR, HRConstants.ROLE_USER })
     @GetMapping("/all")
     public ResponseEntity<List<CandidateDto>> getAll() {

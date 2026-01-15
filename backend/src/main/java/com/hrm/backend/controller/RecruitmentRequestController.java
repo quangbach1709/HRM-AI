@@ -58,7 +58,6 @@ public class RecruitmentRequestController {
         return ResponseEntity.noContent().build();
     }
 
-    @Secured({ HRConstants.ROLE_ADMIN, HRConstants.ROLE_MANAGER, HRConstants.ROLE_HR })
     @GetMapping("/all")
     public ResponseEntity<List<RecruitmentRequestDto>> getAllList() {
         return ResponseEntity.ok(service.getAll());

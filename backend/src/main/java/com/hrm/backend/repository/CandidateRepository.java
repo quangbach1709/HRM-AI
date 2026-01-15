@@ -16,4 +16,6 @@ public interface CandidateRepository extends
     boolean existsByCandidateCode(String candidateCode);
 
     Optional<Candidate> findByCandidateCode(String candidateCode);
+
+    Optional<Candidate> findByCandidateCodeAndPhoneNumber(String candidateCode, String phoneNumber);
 }
