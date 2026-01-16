@@ -3,6 +3,7 @@ package com.hrm.backend.repository;
 import com.hrm.backend.entity.StaffWorkSchedule;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -38,4 +39,28 @@ public interface StaffWorkScheduleRepository extends
                         "AND (s.voided = false OR s.voided IS NULL)")
         StaffWorkSchedule findByStaffIdAndWorkingDate(@Param("staffId") UUID staffId,
                         @Param("workingDate") Date workingDate);
+
+        /**
+         * Mark ABSENT for staff who have not checked in on a specific date.
+         * This method updates records directly in the database for performance
+         * optimization.
+         * Conditions:
+         * - workingDate matches the given targetDate
+         * - checkIn is NULL (staff has not checked in)
+         * - checkOut is NULL
+         * - voided = false (not soft-deleted)
+         * 
+         * Note: Uses CAST for PostgreSQL compatibility.
+         * Job runs at midnight, so we pass yesterday's date as the target.
+         * 
+         * @param targetDate the date to mark absent for
+         * @return number of records updated
+         */
+        @Modifying
+        @Query("UPDATE StaffWorkSchedule s SET s.shiftWorkStatus = 5 " +
+                        "WHERE CAST(s.workingDate AS date) = CAST(:targetDate AS date) " +
+                        "AND s.checkIn IS NULL " +
+                        "AND s.checkOut IS NULL " +
+                        "AND (s.voided = false OR s.voided IS NULL)")
+        int markAbsentForStaffWithoutCheckIn(@Param("targetDate") Date targetDate);
 }
