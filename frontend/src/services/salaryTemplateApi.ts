@@ -1,0 +1,90 @@
+import { SalaryTemplate, SalaryTemplateFormData, SearchSalaryTemplateDto } from '@/types/salaryTemplate';
+import { PageResponse } from '@/types/pagination';
+
+const API_BASE_URL = 'http://localhost:8080/api';
+
+const getAuthToken = (): string | null => {
+    return localStorage.getItem('hrm_token');
+};
+
+const getHeaders = (): HeadersInit => {
+    const token = getAuthToken();
+    const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+    };
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+};
+
+const handleResponse = async <T>(response: Response): Promise<T> => {
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: 'Có lỗi xảy ra' }));
+        throw new Error(error.error || error.message || 'Có lỗi xảy ra');
+    }
+    return response.json();
+};
+
+export const salaryTemplateApi = {
+    search: async (params: SearchSalaryTemplateDto): Promise<PageResponse<SalaryTemplate>> => {
+        const response = await fetch(`${API_BASE_URL}/salary-templates/search`, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify(params),
+        });
+        return handleResponse<PageResponse<SalaryTemplate>>(response);
+    },
+
+    getAll: async (): Promise<SalaryTemplate[]> => {
+        const response = await fetch(`${API_BASE_URL}/salary-templates/all`, {
+            headers: getHeaders(),
+        });
+        return handleResponse<SalaryTemplate[]>(response);
+    },
+
+    getById: async (id: string): Promise<SalaryTemplate> => {
+        const response = await fetch(`${API_BASE_URL}/salary-templates/${id}`, {
+            headers: getHeaders(),
+        });
+        return handleResponse<SalaryTemplate>(response);
+    },
+
+    create: async (data: SalaryTemplateFormData): Promise<SalaryTemplate> => {
+        const response = await fetch(`${API_BASE_URL}/salary-templates`, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify(data),
+        });
+        return handleResponse<SalaryTemplate>(response);
+    },
+
+    update: async (id: string, data: SalaryTemplateFormData): Promise<SalaryTemplate> => {
+        const response = await fetch(`${API_BASE_URL}/salary-templates/${id}`, {
+            method: 'PUT',
+            headers: getHeaders(),
+            body: JSON.stringify(data),
+        });
+        return handleResponse<SalaryTemplate>(response);
+    },
+
+    delete: async (id: string): Promise<void> => {
+        const response = await fetch(`${API_BASE_URL}/salary-templates/${id}`, {
+            method: 'DELETE',
+            headers: getHeaders(),
+        });
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({ error: 'Có lỗi xảy ra' }));
+            throw new Error(error.error || error.message || 'Có lỗi xảy ra');
+        }
+    },
+
+    export: async (params: SearchSalaryTemplateDto): Promise<SalaryTemplate[]> => {
+        const response = await fetch(`${API_BASE_URL}/salary-templates/export`, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify(params),
+        });
+        return handleResponse<SalaryTemplate[]>(response);
+    },
+};

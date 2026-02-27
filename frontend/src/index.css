@@ -1,0 +1,270 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base {
+  :root {
+    /* Core Brand Colors */
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Deep Corporate Blue */
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 215 20% 95%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 215 20% 94%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 215 20% 92%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 20% 90%;
+    --input: 215 20% 90%;
+    --ring: 221 83% 53%;
+
+    --radius: 0.75rem;
+
+    /* Role-Specific Accent Colors */
+    --admin-accent: 263 70% 50%;
+    --admin-accent-foreground: 0 0% 100%;
+    --manager-accent: 38 92% 50%;
+    --manager-accent-foreground: 0 0% 100%;
+    --hr-accent: 172 66% 40%;
+    --hr-accent-foreground: 0 0% 100%;
+    --employee-accent: 142 71% 45%;
+    --employee-accent-foreground: 0 0% 100%;
+
+    /* Status Colors */
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(221, 83%, 53%) 0%, hsl(221, 83%, 40%) 100%);
+    --gradient-admin: linear-gradient(135deg, hsl(263, 70%, 50%) 0%, hsl(263, 70%, 35%) 100%);
+    --gradient-manager: linear-gradient(135deg, hsl(38, 92%, 50%) 0%, hsl(28, 92%, 45%) 100%);
+    --gradient-hr: linear-gradient(135deg, hsl(172, 66%, 40%) 0%, hsl(172, 66%, 30%) 100%);
+    --gradient-employee: linear-gradient(135deg, hsl(142, 71%, 45%) 0%, hsl(142, 71%, 35%) 100%);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(222 47% 11% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(222 47% 11% / 0.07), 0 2px 4px -2px hsl(222 47% 11% / 0.05);
+    --shadow-lg: 0 10px 15px -3px hsl(222 47% 11% / 0.08), 0 4px 6px -4px hsl(222 47% 11% / 0.05);
+    --shadow-xl: 0 20px 25px -5px hsl(222 47% 11% / 0.1), 0 8px 10px -6px hsl(222 47% 11% / 0.05);
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 20% 95%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 215 20% 92%;
+    --sidebar-ring: 221 83% 53%;
+  }
+
+  .dark {
+    --background: 222 47% 8%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 11%;
+
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 217 91% 60%;
+
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 222 47% 11%;
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 33% 17%;
+    --sidebar-ring: 217 91% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* Role Badge Variants */
+  .badge-admin {
+    @apply bg-[hsl(var(--admin-accent))] text-[hsl(var(--admin-accent-foreground))];
+  }
+  .badge-manager {
+    @apply bg-[hsl(var(--manager-accent))] text-[hsl(var(--manager-accent-foreground))];
+  }
+  .badge-hr {
+    @apply bg-[hsl(var(--hr-accent))] text-[hsl(var(--hr-accent-foreground))];
+  }
+  .badge-employee {
+    @apply bg-[hsl(var(--employee-accent))] text-[hsl(var(--employee-accent-foreground))];
+  }
+
+  /* Status Badges */
+  .status-success {
+    @apply bg-[hsl(var(--success)/0.1)] text-[hsl(var(--success))] border border-[hsl(var(--success)/0.2)];
+  }
+  .status-warning {
+    @apply bg-[hsl(var(--warning)/0.1)] text-[hsl(var(--warning))] border border-[hsl(var(--warning)/0.2)];
+  }
+  .status-destructive {
+    @apply bg-destructive/10 text-destructive border border-destructive/20;
+  }
+
+  /* Card Hover Effect */
+  .card-interactive {
+    @apply transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5;
+  }
+
+  /* Mobile Touch Targets */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Smooth scroll for mobile */
+  .scroll-smooth {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-primary);
+  }
+
+  /* Touch manipulation for better mobile UX */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+
+  /* Action button styles - Icon only for mobile-friendly */
+  .action-btn {
+    @apply inline-flex items-center justify-center p-2 text-sm font-medium rounded-md transition-colors min-h-[40px] min-w-[40px] touch-manipulation;
+  }
+  .action-btn-view {
+    @apply action-btn text-blue-600 hover:bg-blue-100 dark:text-blue-400 dark:hover:bg-blue-950;
+  }
+  .action-btn-edit {
+    @apply action-btn text-amber-600 hover:bg-amber-100 dark:text-amber-400 dark:hover:bg-amber-950;
+  }
+  .action-btn-delete {
+    @apply action-btn text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-950;
+  }
+
+  /* Mobile Card View */
+  .mobile-card {
+    @apply p-4 bg-card rounded-lg border border-border shadow-sm;
+  }
+  .mobile-card-header {
+    @apply flex items-start justify-between gap-3 mb-3;
+  }
+  .mobile-card-title {
+    @apply font-semibold text-base text-foreground;
+  }
+  .mobile-card-subtitle {
+    @apply text-sm text-muted-foreground;
+  }
+  .mobile-card-content {
+    @apply space-y-2 text-sm;
+  }
+  .mobile-card-row {
+    @apply flex justify-between items-center py-1 border-b border-border/50 last:border-0;
+  }
+  .mobile-card-label {
+    @apply text-muted-foreground;
+  }
+  .mobile-card-value {
+    @apply font-medium text-foreground;
+  }
+  .mobile-card-actions {
+    @apply flex items-center gap-1 mt-3 pt-3 border-t border-border;
+  }
+
+  /* Responsive table wrapper */
+  .table-responsive {
+    @apply w-full overflow-x-auto;
+  }
+  
+  /* Mobile-first responsive text */
+  .responsive-text {
+    @apply text-sm md:text-base;
+  }
+  
+  /* Mobile header */
+  .mobile-page-header {
+    @apply flex flex-col gap-3 mb-4;
+  }
+  .mobile-page-header h1 {
+    @apply text-xl md:text-2xl font-bold;
+  }
+  .mobile-page-header p {
+    @apply text-sm text-muted-foreground;
+  }
+}
