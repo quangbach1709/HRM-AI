@@ -1,7 +1,6 @@
 package com.hrm.backend.controller;
 
 import com.hrm.backend.dto.StaffWorkScheduleDto;
-import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.dto.response.PageResponse;
 import com.hrm.backend.dto.search.SearchStaffWorkScheduleDto;
 import com.hrm.backend.service.StaffWorkScheduleService;
@@ -20,7 +19,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/staff-work-schedules")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class StaffWorkScheduleController {
 
     private final StaffWorkScheduleService service;

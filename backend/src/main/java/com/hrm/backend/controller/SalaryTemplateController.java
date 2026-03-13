@@ -1,7 +1,6 @@
 package com.hrm.backend.controller;
 
 import com.hrm.backend.dto.SalaryTemplateDto;
-import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.dto.response.PageResponse;
 import com.hrm.backend.dto.search.SearchSalaryTemplateDto;
 import com.hrm.backend.service.SalaryTemplateService;
@@ -18,7 +17,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/salary-templates")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class SalaryTemplateController {
 
     private final SalaryTemplateService service;

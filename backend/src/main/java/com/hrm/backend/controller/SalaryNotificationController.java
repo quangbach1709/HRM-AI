@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/salary-notifications")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 @Slf4j
 public class SalaryNotificationController {
 

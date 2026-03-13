@@ -1,7 +1,7 @@
 import { UserRole, SearchUserRoleDto } from '../types/role'; // Recycling types from role.ts
 import { PageResponse } from '../types/pagination';
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = `${import.meta.env.VITE_GATEWAY_URL || 'http://localhost:9000'}/api/v1/hr`;
 const ENDPOINT = '/user-roles';
 
 const getAuthToken = (): string | null => {

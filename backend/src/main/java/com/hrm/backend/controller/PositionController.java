@@ -22,7 +22,6 @@ import org.springframework.security.access.annotation.Secured;
 
 @RestController
 @RequestMapping("/api/positions")
-@CrossOrigin(origins = { "http://localhost:5173", "http://localhost:3000" })
 public class PositionController {
 
     @Autowired

@@ -1,6 +1,8 @@
 import { DashboardStats, DashboardSyncResponse } from '@/types/dashboard';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const GATEWAY_URL = import.meta.env.VITE_GATEWAY_URL || 'http://localhost:9000';
+// Dashboard endpoints live under the HR service → routed via /api/v1/hr/
+const API_BASE_URL = `${GATEWAY_URL}/api/v1/hr`;
 
 const getAuthHeaders = () => {
     const token = localStorage.getItem('hrm_token');
@@ -14,7 +16,7 @@ const getAuthHeaders = () => {
  * Lấy thống kê tháng hiện tại
  */
 export const getCurrentStats = async (): Promise<DashboardStats> => {
-    const response = await fetch(`${API_BASE_URL}/api/dashboard/stats`, {
+    const response = await fetch(`${API_BASE_URL}/dashboard/stats`, {
         method: 'GET',
         headers: getAuthHeaders(),
     });
@@ -30,7 +32,7 @@ export const getCurrentStats = async (): Promise<DashboardStats> => {
  * Lấy thống kê theo tháng cụ thể
  */
 export const getStatsByMonth = async (monthKey: string): Promise<DashboardStats> => {
-    const response = await fetch(`${API_BASE_URL}/api/dashboard/stats/${monthKey}`, {
+    const response = await fetch(`${API_BASE_URL}/dashboard/stats/${monthKey}`, {
         method: 'GET',
         headers: getAuthHeaders(),
     });
@@ -46,7 +48,7 @@ export const getStatsByMonth = async (monthKey: string): Promise<DashboardStats>
  * Đồng bộ dữ liệu từ PostgreSQL sang MongoDB (Admin only)
  */
 export const syncCurrentStats = async (): Promise<DashboardSyncResponse> => {
-    const response = await fetch(`${API_BASE_URL}/api/dashboard/sync`, {
+    const response = await fetch(`${API_BASE_URL}/dashboard/sync`, {
         method: 'POST',
         headers: getAuthHeaders(),
     });
@@ -62,7 +64,7 @@ export const syncCurrentStats = async (): Promise<DashboardSyncResponse> => {
  * Đồng bộ dữ liệu cho tháng cụ thể (Admin only)
  */
 export const syncStatsByMonth = async (monthKey: string): Promise<DashboardSyncResponse> => {
-    const response = await fetch(`${API_BASE_URL}/api/dashboard/sync/${monthKey}`, {
+    const response = await fetch(`${API_BASE_URL}/dashboard/sync/${monthKey}`, {
         method: 'POST',
         headers: getAuthHeaders(),
     });

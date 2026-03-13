@@ -3,7 +3,6 @@ package com.hrm.backend.controller;
 import com.hrm.backend.dto.CalculateSalaryRequestDto;
 import com.hrm.backend.dto.CalculateSalaryResponseDto;
 import com.hrm.backend.dto.SalaryResultDto;
-import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.dto.response.PageResponse;
 import com.hrm.backend.dto.search.SearchSalaryResultDto;
 import com.hrm.backend.service.SalaryCalculationService;
@@ -21,7 +20,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/salary-results")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class SalaryResultController {
 
     private final SalaryResultService service;

@@ -17,7 +17,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/staff")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class StaffController {
 
     private final StaffService service;

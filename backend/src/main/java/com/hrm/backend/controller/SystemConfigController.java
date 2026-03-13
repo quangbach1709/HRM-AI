@@ -3,7 +3,6 @@ package com.hrm.backend.controller;
 import com.hrm.backend.dto.SystemConfigDto;
 import com.hrm.backend.dto.response.PageResponse;
 import com.hrm.backend.dto.search.SearchSystemConfigDto;
-import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.service.SystemConfigService;
 import com.hrm.backend.utils.HRConstants;
 import jakarta.persistence.EntityNotFoundException;
@@ -22,7 +21,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/system-configs")
 @RequiredArgsConstructor
-@CrossOrigin(origins = { "http://localhost:5173", "http://localhost:3000" })
 public class SystemConfigController {
 
     private final SystemConfigService service;

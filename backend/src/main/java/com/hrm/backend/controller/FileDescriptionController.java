@@ -15,7 +15,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/file-descriptions")
-@CrossOrigin(origins = { "http://localhost:5173", "http://localhost:3000" })
 public class FileDescriptionController {
 
     private final FileDescriptionService fileDescriptionService;

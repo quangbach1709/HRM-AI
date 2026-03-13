@@ -3,7 +3,6 @@ package com.hrm.backend.controller;
 import com.hrm.backend.dto.RecruitmentRequestDto;
 
 import com.hrm.backend.dto.response.PageResponse;
-import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.dto.search.SearchRecruitmentRequestDto;
 import com.hrm.backend.service.RecruitmentRequestService;
 import com.hrm.backend.utils.HRConstants;
@@ -19,7 +18,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/recruitment-requests")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class RecruitmentRequestController {
 
     private final RecruitmentRequestService service;

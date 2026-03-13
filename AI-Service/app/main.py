@@ -8,7 +8,6 @@ import cv2
 import numpy as np
 from typing import List, Optional
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from app.services.anti_spoof import get_anti_spoof_service
@@ -19,15 +18,6 @@ app = FastAPI(
     title="Face Attendance System API",
     description="API cho hệ thống chấm công bằng khuôn mặt",
     version="1.0.0"
-)
-
-# CORS cho phép ReactJS frontend gọi API
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],  # React dev servers
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
 )
 
 

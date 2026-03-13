@@ -28,7 +28,7 @@ import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
 import { getFileUrl } from '@/services/fileApi';
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = `${import.meta.env.VITE_GATEWAY_URL || 'http://localhost:9000'}/api/v1/hr`;
 const LOCAL_STORAGE_KEY = 'candidate_application_data';
 
 // Full form schema matching HR CandidateFormModal

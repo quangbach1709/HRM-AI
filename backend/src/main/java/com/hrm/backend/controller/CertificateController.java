@@ -1,7 +1,6 @@
 package com.hrm.backend.controller;
 
 import com.hrm.backend.dto.CertificateDto;
-import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.dto.response.PageResponse;
 import com.hrm.backend.dto.search.SearchCertificateDto;
 import com.hrm.backend.service.CertificateService;
@@ -18,7 +17,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/certificates")
 @RequiredArgsConstructor
-@CrossOrigin(origins = { "http://localhost:5173", "http://localhost:3000" })
 public class CertificateController {
 
     private final CertificateService service;

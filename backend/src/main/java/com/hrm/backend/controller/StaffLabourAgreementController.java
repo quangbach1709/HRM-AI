@@ -19,7 +19,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/labour-agreements")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class StaffLabourAgreementController {
 
     private final StaffLabourAgreementService service;

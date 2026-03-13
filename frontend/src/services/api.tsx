@@ -1,8 +1,14 @@
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
-const API_BASE_URL = 'http://localhost:8080/api';
-// const API_BASE_URL = `http://192.168.1.15:8080/api`;
+// ── Gateway is now the single entry point ────────────────────────────────────
+// All HR-service paths are reachable under /api/v1/hr/
+// The Gateway strips the /api/v1/hr prefix before forwarding to the backend,
+// so the backend continues to serve its existing /api/** endpoints unchanged.
+const GATEWAY_BASE_URL = import.meta.env.VITE_GATEWAY_URL || 'http://localhost:9000';
+const API_BASE_URL = `${GATEWAY_BASE_URL}/api/v1/hr`;
+// Legacy direct-to-backend (keep for reference / local override):
+// const API_BASE_URL = 'http://localhost:8080/api';
 
 
 const axiosInstance: AxiosInstance = axios.create({

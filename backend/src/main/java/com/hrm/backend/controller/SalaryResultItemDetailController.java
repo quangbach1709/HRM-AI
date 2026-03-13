@@ -1,7 +1,6 @@
 package com.hrm.backend.controller;
 
 import com.hrm.backend.dto.SalaryResultItemDetailDto;
-import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.dto.response.PageResponse;
 import com.hrm.backend.dto.search.SearchSalaryResultItemDetailDto;
 import com.hrm.backend.service.SalaryResultItemDetailService;
@@ -18,7 +17,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/salary-result-item-details")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class SalaryResultItemDetailController {
 
     private final SalaryResultItemDetailService service;

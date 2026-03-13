@@ -17,7 +17,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/user-roles")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class UserRoleController {
 
     private final UserRoleService service;

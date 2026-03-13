@@ -1,0 +1,98 @@
+server:
+  port: ${GATEWAY_PORT:9000}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# JWT – must use the SAME secret as the HR backend so tokens are interoperable.
+# In production, inject this via the shared .env / secret manager.
+# ─────────────────────────────────────────────────────────────────────────────
+jwt:
+  secret: ${JWT_SECRET:your-256-bit-secret-key-here-must-be-at-least-32-characters}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Downstream service URLs
+# ─────────────────────────────────────────────────────────────────────────────
+services:
+  hr-service:
+    url: ${HR_SERVICE_URL:http://localhost:8080}
+  ai-service:
+    url: ${AI_SERVICE_URL:http://localhost:8000}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Spring Cloud Gateway
+# ─────────────────────────────────────────────────────────────────────────────
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+
+      # ── Global CORS (applies to every route) ────────────────────────────────
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:5173"    # Vite dev server
+              - "http://localhost:3000"    # CRA / alternative dev port
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            exposedHeaders:
+              - "Authorization"
+            allowCredentials: true
+            maxAge: 3600
+
+      # ── Routes ──────────────────────────────────────────────────────────────
+      routes:
+
+        # ── 1. Auth endpoints (PUBLIC – no JWT required) ─────────────────────
+        # Must be declared BEFORE the protected HR route so the more-specific
+        # path predicate matches first.
+        - id: hr-auth
+          uri: ${services.hr-service.url}
+          predicates:
+            - Path=/api/v1/hr/auth/**
+          filters:
+            # Strip the /api/v1/hr prefix → backend sees /api/auth/**
+            - RewritePath=/api/v1/hr/(?<segment>.*), /api/${segment}
+
+        # ── 2. HR Service (PROTECTED) ────────────────────────────────────────
+        # All other /api/v1/hr/** requests require a valid JWT.
+        - id: hr-service
+          uri: ${services.hr-service.url}
+          predicates:
+            - Path=/api/v1/hr/**
+          filters:
+            - name: JwtAuthentication
+            # Strip /api/v1/hr → backend sees /api/**
+            - RewritePath=/api/v1/hr/(?<segment>.*), /api/${segment}
+            # Optional: add a header so the backend knows the request came via Gateway
+            - AddRequestHeader=X-Gateway-Source, api-gateway
+
+        # ── 3. AI Service (PROTECTED) ────────────────────────────────────────
+        # Requests to /api/v1/ai/** are forwarded to FastAPI on port 8000.
+        # The prefix is stripped so FastAPI sees its native /api/attendance/** paths.
+        - id: ai-service
+          uri: ${services.ai-service.url}
+          predicates:
+            - Path=/api/v1/ai/**
+          filters:
+            - name: JwtAuthentication
+            # Strip /api/v1/ai → FastAPI sees /api/**
+            - RewritePath=/api/v1/ai/(?<segment>.*), /api/${segment}
+            - AddRequestHeader=X-Gateway-Source, api-gateway
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Logging
+# ─────────────────────────────────────────────────────────────────────────────
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    com.hrm.gateway: DEBUG
+    reactor.netty: WARN

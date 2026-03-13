@@ -1,7 +1,6 @@
 package com.hrm.backend.controller;
 
 import com.hrm.backend.dto.SalaryPeriodDto;
-import com.hrm.backend.dto.search.SearchDto;
 import com.hrm.backend.dto.response.PageResponse;
 import com.hrm.backend.dto.search.SearchSalaryPeriodDto;
 import com.hrm.backend.service.SalaryPeriodService;
@@ -18,7 +17,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/salary-periods")
-@CrossOrigin(origins = "*")
 public class SalaryPeriodController {
 
     private final SalaryPeriodService service;
