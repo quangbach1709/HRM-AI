@@ -11,6 +11,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URI;
 import java.util.UUID;
 
 @RestController
@@ -45,28 +46,31 @@ public class FileDescriptionController {
     }
 
     /**
-     * View file inline (for images, PDFs)
-     * Public endpoint - no authentication required (for img src loading)
+     * Lấy public URL của file trong MinIO.
+     * Frontend dùng URL này để hiển thị ảnh / PDF trực tiếp (không proxy qua backend).
+     * Public endpoint — không cần xác thực (cho phép <img src="..."> hoạt động).
      */
-    @GetMapping("/{id}/view")
-    public ResponseEntity<Resource> viewFile(@PathVariable UUID id) {
-        FileDescriptionDto fileInfo = fileDescriptionService.getById(id);
-        Resource resource = fileDescriptionService.getFileAsResource(id);
-
-        String contentType = fileInfo.getContentType();
-        if (contentType == null) {
-            contentType = "application/octet-stream";
-        }
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "inline; filename=\"" + fileInfo.getName() + "\"")
-                .body(resource);
+    @GetMapping("/{id}/url")
+    public ResponseEntity<String> getFileUrl(@PathVariable UUID id) {
+        String url = fileDescriptionService.getPublicUrl(id);
+        return ResponseEntity.ok(url);
     }
 
     /**
-     * Download file as attachment
+     * View file inline (redirect tới presigned URL MinIO — hết hạn sau 1 giờ).
+     * Dùng khi cần bảo mật hơn (URL tạm thời).
+     * Public endpoint — không cần xác thực (cho phép <img src="..."> hoạt động).
+     */
+    @GetMapping("/{id}/view")
+    public ResponseEntity<Void> viewFile(@PathVariable UUID id) {
+        String presignedUrl = fileDescriptionService.getPresignedUrl(id);
+        return ResponseEntity.status(302)
+                .location(URI.create(presignedUrl))
+                .build();
+    }
+
+    /**
+     * Download file dưới dạng stream qua backend (attachment).
      */
     @GetMapping("/{id}/download")
     @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR, HRConstants.ROLE_USER })

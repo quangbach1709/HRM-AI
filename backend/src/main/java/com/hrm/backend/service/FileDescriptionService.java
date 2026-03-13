@@ -16,5 +16,12 @@ public interface FileDescriptionService {
 
     FileDescription getEntityById(UUID id);
 
+    /** Stream file qua backend (dùng cho /download) */
     Resource getFileAsResource(UUID id);
+
+    /** Presigned URL hết hạn sau 1 giờ (dùng cho /view khi cần bảo mật) */
+    String getPresignedUrl(UUID id);
+
+    /** Public URL trực tiếp tới MinIO (dùng khi bucket có policy public-read) */
+    String getPublicUrl(UUID id);
 }

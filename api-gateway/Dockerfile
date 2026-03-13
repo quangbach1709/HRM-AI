@@ -29,11 +29,11 @@ RUN chown -R appuser:appuser /app
 
 USER appuser
 
-# Backend chạy trên port 8080
-EXPOSE 8080
+# API Gateway chạy trên port 9000
+EXPOSE 9000
 
-# Health check dùng actuator
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost:8080/actuator/health || exit 1
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:9000/actuator/health || exit 1
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

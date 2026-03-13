@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+        Root aggregator POM for the HRM-AI mono-repo.
+
+        Purpose: lets you build / test all Java modules from the repo root with
+            mvn clean install
+        or run a single module with
+            mvn -pl api-gateway spring-boot:run
+
+        IMPORTANT: this is an AGGREGATOR only (packaging=pom).
+        Each child module keeps its own <parent> pointing at spring-boot-starter-parent
+        and is fully buildable on its own.  This POM does NOT override their parents.
+    -->
+
+    <groupId>com.hrm</groupId>
+    <artifactId>hrm-ai-root</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>HRM-AI Root</name>
+    <description>Aggregator POM for the HRM-AI microservices project</description>
+
+    <modules>
+        <module>backend</module>
+        <module>api-gateway</module>
+    </modules>
+
+</project>

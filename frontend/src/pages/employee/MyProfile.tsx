@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/AuthContext';
 import { userApi } from '@/services/userApi';
 import { personApi } from '@/services/personApi';
+import { getFileUrl } from '@/services/fileApi';
 import { UserFormData } from '@/types/user';
 import { genderOptions } from '@/types/person';
 import {
@@ -20,8 +21,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-
-const API_BASE_URL = `${import.meta.env.VITE_GATEWAY_URL || 'http://localhost:9000'}/api/v1/hr`;
 
 export default function MyProfile() {
   const { user, staff, person, refreshUserData } = useAuth();
@@ -158,9 +157,7 @@ export default function MyProfile() {
     }
   };
 
-  const avatarUrl = person?.avatar?.id
-    ? `${API_BASE_URL}/file-descriptions/${person.avatar.id}/view`
-    : null;
+  const avatarUrl = person?.avatar ? getFileUrl(person.avatar) : null;
 
   const profileFields = [
     { label: 'Họ và tên', value: person?.displayName || user?.name, icon: User, key: 'displayName' },

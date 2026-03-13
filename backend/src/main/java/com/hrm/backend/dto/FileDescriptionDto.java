@@ -1,6 +1,5 @@
 package com.hrm.backend.dto;
 
-
 import com.hrm.backend.entity.FileDescription;
 
 public class FileDescriptionDto extends AuditableDto {
@@ -9,6 +8,7 @@ public class FileDescriptionDto extends AuditableDto {
     private String name;
     private String extension;
     private String filePath;
+    private String url;
 
     public FileDescriptionDto() {
     }
@@ -22,6 +22,25 @@ public class FileDescriptionDto extends AuditableDto {
             this.extension = entity.getExtension();
             this.filePath = entity.getFilePath();
         }
+    }
+
+    /**
+     * Constructor dùng khi cần truyền thêm minioEndpoint và bucketName
+     * để tự tính public URL ngay trong DTO — frontend dùng trường {@code url} này để hiển thị ảnh.
+     */
+    public FileDescriptionDto(FileDescription entity, String minioEndpoint, String bucketName) {
+        this(entity);
+        if (entity != null && entity.getFilePath() != null && minioEndpoint != null) {
+            this.url = minioEndpoint + "/" + bucketName + "/" + entity.getFilePath();
+        }
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public static FileDescription toEntity(FileDescriptionDto dto) {

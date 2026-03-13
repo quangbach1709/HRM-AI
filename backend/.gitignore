@@ -28,6 +28,10 @@ target/
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
-
+frontend/.env
+frontend/.env.local
+frontend/.env.development
+frontend/.env.production
+frontend/yarn.lock
 ### VS Code ###
 .vscode/

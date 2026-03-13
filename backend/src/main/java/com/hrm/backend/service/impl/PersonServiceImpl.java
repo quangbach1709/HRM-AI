@@ -151,7 +151,9 @@ public class PersonServiceImpl implements PersonService {
     public PersonDto getCurrentPerson() {
         User currentUser = userService.getCurrentUserEntity();
         if (currentUser != null && currentUser.getPerson() != null) {
-            return new PersonDto(currentUser.getPerson(), true);
+            PersonDto personDto= new  PersonDto(currentUser.getPerson(), true);
+            personDto.getAvatar().setUrl(fileDescriptionService.getPublicUrl(currentUser.getPerson().getAvatar().getId()));
+            return personDto;
         }
         return null;
     }

@@ -1,40 +1,34 @@
 # Build stage
-FROM node:25-alpine AS builder
+FROM node:25.2-alpine AS builder
 
 WORKDIR /app
 
 # Copy package files
-COPY package.json bun.lockb ./
+COPY package.json bun.lockb* package-lock.json* ./
 
-# Install dependencies using npm (since bun might not be available in container)
+# Cài đặt dependencies
 RUN npm install --legacy-peer-deps
 
-# Copy source code
+# Copy source và build
 COPY . .
-
-# Build application
 RUN npm run build
 
 # Production stage
-FROM node:25-alpine
+FROM node:25.2-alpine
 
 WORKDIR /app
 
-# Install serve to run the production build
+# Cài đặt 'serve' để chạy production build
 RUN npm install -g serve
 
-# Copy built application from builder
+# Copy folder build từ builder stage
 COPY --from=builder /app/dist ./dist
 
-# Copy package.json for reference
-COPY package.json ./
+# Frontend chạy trên port 5173
+EXPOSE 5173
 
-# Expose port
-EXPOSE 3000
-
-# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:3000', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+    CMD node -e "require('http').get('http://localhost:5173', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
 
-# Start application
-CMD ["serve", "-s", "dist", "-l", "3000"]
+# Chạy trên port 5173 để khớp với Gateway configuration
+CMD ["serve", "-s", "dist", "-l", "5173"]

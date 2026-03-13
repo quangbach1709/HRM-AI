@@ -6,6 +6,8 @@ export interface FileDescription {
   contentSize: string;
   filePath: string;
   extension: string;
+  /** Public URL trực tiếp tới file trên MinIO — dùng trường này để hiển thị ảnh / PDF */
+  url?: string;
   createdAt?: string;
   updatedAt?: string;
   createdBy?: string;

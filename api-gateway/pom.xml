@@ -48,6 +48,12 @@
             <artifactId>spring-cloud-starter-gateway</artifactId>
         </dependency>
 
+        <!-- ── Health & Monitoring: Spring Boot Actuator ── -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
         <!-- ── Reactive Security (needed for the JWT filter) ── -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

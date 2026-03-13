@@ -4,19 +4,27 @@ import { PageResponse } from '@/types/pagination';
 const API_BASE_URL = `${import.meta.env.VITE_GATEWAY_URL || 'http://localhost:9000'}/api/v1/hr`;
 
 /**
- * Helper to construct the URL for viewing/downloading a file
- * Uses the same pattern as MyProfile.tsx: /file-descriptions/{id}/view
- * @param imageUrl - Can be a FileDescription object or object with id property
+ * Helper to construct the URL for viewing/downloading a file.
+ *
+ * Priority order:
+ *  1. `imageUrl.url`  — public MinIO URL trả về từ backend (ưu tiên dùng trường này)
+ *  2. `imageUrl.id`   — fallback: gọi endpoint /view qua backend gateway
+ *  3. string "http…"  — URL tuyệt đối, trả về nguyên
+ *  4. string khác     — ghép với API_BASE_URL
+ *  5. null/undefined  — placeholder
  */
 export const getFileUrl = (imageUrl: any): string => {
   if (!imageUrl) return '/placeholder-face.jpg';
 
-  // If it's a FileDescription object or object with id
-  if (typeof imageUrl === 'object' && imageUrl.id) {
-    return `${API_BASE_URL}/file-descriptions/${imageUrl.id}/view`;
+  // Nếu là object FileDescription (hoặc bất kỳ object có trường url / id)
+  if (typeof imageUrl === 'object') {
+    // Ưu tiên trường url (public MinIO URL) nếu backend đã trả về
+    if (imageUrl.url) return imageUrl.url;
+    // Fallback: proxy qua backend
+    if (imageUrl.id) return `${API_BASE_URL}/file-descriptions/${imageUrl.id}/view`;
   }
 
-  // If it's a string (direct URL or file path)
+  // Nếu là string
   if (typeof imageUrl === 'string') {
     if (imageUrl.startsWith('http')) return imageUrl;
     return `${API_BASE_URL}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
