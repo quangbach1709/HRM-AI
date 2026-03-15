@@ -21,6 +21,17 @@ public interface FaceEmbeddingService {
 
     List<FaceEmbeddingDto> getByPersonId(UUID personId);
 
+    /**
+     * HR duyệt khuôn mặt:
+     * 1. Cập nhật isActive = true trong DB backend
+     * 2. Publish RabbitMQ message để AI Service cập nhật is_active = true trong DB của nó
+     *
+     * @param id         ID bản ghi FaceEmbedding phía backend
+     * @param approvedBy Username của HR thực hiện duyệt (lấy từ SecurityContext)
+     * @return DTO đã được cập nhật
+     */
+    FaceEmbeddingDto approveFace(UUID id, String approvedBy);
+
     /** Used by attendance flow to call AI Service for liveness check + embedding extraction. */
     AIFaceVerificationResponse callAIService(List<MultipartFile> frames);
 

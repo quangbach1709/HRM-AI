@@ -1,6 +1,7 @@
 package com.hrm.backend.service.impl;
 
 import com.hrm.backend.dto.AIFaceVerificationResponse;
+import com.hrm.backend.dto.FaceApprovalMessage;
 import com.hrm.backend.dto.FaceEmbeddingDto;
 import com.hrm.backend.dto.FileDescriptionDto;
 import com.hrm.backend.dto.response.PageResponse;
@@ -12,11 +13,14 @@ import com.hrm.backend.entity.FileDescription;
 import com.hrm.backend.repository.FaceEmbeddingRepository;
 import com.hrm.backend.repository.PersonRepository;
 import com.hrm.backend.repository.FileDescriptionRepository;
+import com.hrm.backend.config.RabbitMQConfig;
 import com.hrm.backend.service.FaceEmbeddingService;
 import com.hrm.backend.specification.FaceEmbeddingSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
@@ -38,6 +42,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class FaceEmbeddingServiceImpl implements FaceEmbeddingService {
 
     private final FaceEmbeddingRepository faceEmbeddingRepository;
@@ -45,6 +50,7 @@ public class FaceEmbeddingServiceImpl implements FaceEmbeddingService {
     private final FileDescriptionRepository fileDescriptionRepository;
     private final FaceEmbeddingSpecification faceEmbeddingSpecification;
     private final RestTemplate restTemplate;
+    private final RabbitTemplate rabbitTemplate;
 
     @Value("${ai.service.url:http://localhost:8000}")
     private String aiServiceUrl;
@@ -144,6 +150,50 @@ public class FaceEmbeddingServiceImpl implements FaceEmbeddingService {
     public List<FaceEmbeddingDto> getByPersonId(UUID personId) {
         List<FaceEmbedding> list = faceEmbeddingRepository.findByPersonId(personId);
         return list.stream().map(this::toDto).collect(Collectors.toList());
+    }
+
+    // ==================== FACE APPROVAL ====================
+
+    @Override
+    @Transactional
+    public FaceEmbeddingDto approveFace(UUID id, String approvedBy) {
+        FaceEmbedding entity = faceEmbeddingRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy FaceEmbedding với ID: " + id));
+
+        if (entity.isActive()) {
+            throw new IllegalArgumentException("Khuôn mặt này đã được duyệt rồi.");
+        }
+
+        // 1. Cập nhật trạng thái trong DB backend
+        entity.setActive(true);
+        FaceEmbedding saved = faceEmbeddingRepository.save(entity);
+
+        // 2. Publish RabbitMQ message để AI Service đồng bộ is_active = true
+        if (saved.getAiEmbeddingId() != null) {
+            FaceApprovalMessage message = new FaceApprovalMessage(
+                    saved.getAiEmbeddingId(),
+                    saved.getId().toString(),
+                    true,
+                    approvedBy
+            );
+            try {
+                rabbitTemplate.convertAndSend(
+                        RabbitMQConfig.FACE_APPROVAL_EXCHANGE,
+                        RabbitMQConfig.FACE_APPROVAL_ROUTING_KEY,
+                        message
+                );
+                log.info("Published face approval message: aiEmbeddingId={}, approvedBy={}",
+                        saved.getAiEmbeddingId(), approvedBy);
+            } catch (Exception e) {
+                // Không rollback — backend DB đã cập nhật thành công.
+                // AI Service sẽ đồng bộ sau khi kết nối RabbitMQ phục hồi.
+                log.error("Không thể publish face approval message lên RabbitMQ: {}", e.getMessage(), e);
+            }
+        } else {
+            log.warn("FaceEmbedding id={} không có aiEmbeddingId — bỏ qua publish RabbitMQ", id);
+        }
+
+        return toDto(saved);
     }
 
     // ==================== ATTENDANCE VERIFICATION ====================

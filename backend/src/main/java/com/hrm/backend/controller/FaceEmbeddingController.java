@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -77,6 +79,16 @@ public class FaceEmbeddingController {
         Map<String, String> response = new HashMap<>();
         response.put("message", "Xóa FaceEmbedding thành công");
         return ResponseEntity.ok(response);
+    }
+
+    // Approve (HR duyệt khuôn mặt: set isActive = true + đồng bộ sang AI Service qua RabbitMQ)
+    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR })
+    @PostMapping("/approve/{id}")
+    public ResponseEntity<FaceEmbeddingDto> approve(@PathVariable UUID id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String approvedBy = auth != null ? auth.getName() : "unknown";
+        FaceEmbeddingDto approved = faceEmbeddingService.approveFace(id, approvedBy);
+        return ResponseEntity.ok(approved);
     }
 
     // Exception Handlers

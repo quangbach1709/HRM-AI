@@ -15,12 +15,15 @@ from app.services.anti_spoof import get_anti_spoof_service
 from app.services.face_recognition import get_face_recognition_service
 from app.database import create_tables
 from app.routers import face_registration
+from app.services.rabbitmq_consumer import start_face_approval_consumer
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Khởi tạo database tables khi startup
     create_tables()
+    # Khởi chạy consumer lắng nghe message duyệt khuôn mặt từ Backend Java
+    start_face_approval_consumer()
     yield
 
 

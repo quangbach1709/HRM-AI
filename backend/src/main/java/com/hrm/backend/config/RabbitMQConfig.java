@@ -16,10 +16,15 @@ public class RabbitMQConfig {
     public static final String EMAIL_EXCHANGE = "email.exchange";
     public static final String SALARY_EMAIL_ROUTING_KEY = "email.salary.key";
 
-    // ── Face Embedding queue (mới — nhận từ AI Service) ──────────────────────
+    // ── Face Embedding queue (nhận từ AI Service — đăng ký mặt) ─────────────
     public static final String FACE_EMBEDDING_QUEUE = "face.embedding.queue";
     public static final String FACE_EMBEDDING_EXCHANGE = "face.embedding.exchange";
     public static final String FACE_EMBEDDING_ROUTING_KEY = "face.embedding.key";
+
+    // ── Face Approval queue (gửi sang AI Service — HR duyệt) ─────────────────
+    public static final String FACE_APPROVAL_QUEUE = "face.approval.queue";
+    public static final String FACE_APPROVAL_EXCHANGE = "face.approval.exchange";
+    public static final String FACE_APPROVAL_ROUTING_KEY = "face.approval.key";
 
     // ── Beans: Salary Email ───────────────────────────────────────────────────
 
@@ -53,6 +58,23 @@ public class RabbitMQConfig {
     @Bean
     public Binding faceEmbeddingBinding(Queue faceEmbeddingQueue, TopicExchange faceEmbeddingExchange) {
         return BindingBuilder.bind(faceEmbeddingQueue).to(faceEmbeddingExchange).with(FACE_EMBEDDING_ROUTING_KEY);
+    }
+
+    // ── Beans: Face Approval ──────────────────────────────────────────────────
+
+    @Bean
+    public Queue faceApprovalQueue() {
+        return new Queue(FACE_APPROVAL_QUEUE, true);
+    }
+
+    @Bean
+    public TopicExchange faceApprovalExchange() {
+        return new TopicExchange(FACE_APPROVAL_EXCHANGE);
+    }
+
+    @Bean
+    public Binding faceApprovalBinding(Queue faceApprovalQueue, TopicExchange faceApprovalExchange) {
+        return BindingBuilder.bind(faceApprovalQueue).to(faceApprovalExchange).with(FACE_APPROVAL_ROUTING_KEY);
     }
 
     // ── Shared Infrastructure ─────────────────────────────────────────────────

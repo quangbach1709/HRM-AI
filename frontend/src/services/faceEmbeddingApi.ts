@@ -62,7 +62,7 @@ export const faceEmbeddingApi = {
   },
 
   /**
-   * Cập nhật face embedding (HR duyệt: set isActive = true)
+   * Cập nhật face embedding (chỉnh sửa thủ công bởi HR/Admin)
    */
   update: async (id: string, data: { personId: string; isActive: boolean; modelVersion?: string }): Promise<FaceEmbedding> => {
     const response = await api.put<FaceEmbedding>(`/face-embeddings/${id}`, {
@@ -70,6 +70,16 @@ export const faceEmbeddingApi = {
       isActive: data.isActive,
       modelVersion: data.modelVersion,
     });
+    return response.data;
+  },
+
+  /**
+   * HR duyệt khuôn mặt:
+   * - Cập nhật isActive = true trong DB backend
+   * - Publish RabbitMQ message để AI Service đồng bộ is_active = true
+   */
+  approve: async (id: string): Promise<FaceEmbedding> => {
+    const response = await api.post<FaceEmbedding>(`/face-embeddings/approve/${id}`);
     return response.data;
   },
 

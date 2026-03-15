@@ -122,11 +122,16 @@ export default function FaceApproval() {
     if (!data.id) return;
     setIsLoading(true);
     try {
-      await faceEmbeddingApi.update(data.id, {
-        personId: data.personId,
-        isActive: data.isActive,
-        modelVersion: data.modelVersion,
-      });
+      if (data.isActive) {
+        // Route through the dedicated approval endpoint so AI Service is notified via RabbitMQ
+        await faceEmbeddingApi.approve(data.id);
+      } else {
+        await faceEmbeddingApi.update(data.id, {
+          personId: data.personId,
+          isActive: data.isActive,
+          modelVersion: data.modelVersion,
+        });
+      }
       toast({ title: 'Cập nhật thành công', description: 'Đã cập nhật thông tin khuôn mặt' });
       setIsFormModalOpen(false);
       loadFaceEmbeddings(searchParams);
@@ -140,11 +145,7 @@ export default function FaceApproval() {
   const handleQuickApprove = async (face: FaceEmbedding) => {
     setIsLoading(true);
     try {
-      await faceEmbeddingApi.update(face.id, {
-        personId: face.person?.id || '',
-        isActive: true,
-        modelVersion: face.modelVersion,
-      });
+      await faceEmbeddingApi.approve(face.id);
       toast({ title: 'Đã duyệt', description: `Đã duyệt khuôn mặt của ${face.person?.displayName}` });
       loadFaceEmbeddings(searchParams);
     } catch (error: any) {
