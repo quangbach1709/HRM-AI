@@ -21,11 +21,9 @@ public interface FaceEmbeddingService {
 
     List<FaceEmbeddingDto> getByPersonId(UUID personId);
 
-    List<FaceEmbeddingDto> registerFace(List<MultipartFile> frames);
-
-    //Kiểm tra khuôn mặt có trùng khớp với khuôn mặt đã đăng ký không
-    Boolean verifyFace(FaceEmbeddingDto dto);
-
-
+    /** Used by attendance flow to call AI Service for liveness check + embedding extraction. */
     AIFaceVerificationResponse callAIService(List<MultipartFile> frames);
+
+    /** Used by attendance flow to verify extracted embedding against registered face embeddings. */
+    Boolean verifyFace(FaceEmbeddingDto dto);
 }

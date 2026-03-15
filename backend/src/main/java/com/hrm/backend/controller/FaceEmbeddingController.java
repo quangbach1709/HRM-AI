@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +50,7 @@ public class FaceEmbeddingController {
         return ResponseEntity.ok(list);
     }
 
-    // Create
+    // Create (HR/Admin thủ công nếu cần)
     @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR })
     @PostMapping
     public ResponseEntity<FaceEmbeddingDto> create(@Valid @RequestBody FaceEmbeddingDto dto) {
@@ -59,7 +58,7 @@ public class FaceEmbeddingController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    // Update
+    // Update (HR duyệt khuôn mặt: set isActive = true)
     @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR })
     @PutMapping("/{id}")
     public ResponseEntity<FaceEmbeddingDto> update(
@@ -68,15 +67,6 @@ public class FaceEmbeddingController {
         dto.setId(id);
         FaceEmbeddingDto updated = faceEmbeddingService.saveOrUpdate(dto);
         return ResponseEntity.ok(updated);
-    }
-
-    //Dang ky khuon mat
-    @Secured({ HRConstants.ROLE_MANAGER, HRConstants.ROLE_ADMIN, HRConstants.ROLE_HR , HRConstants.ROLE_USER })
-    @PostMapping("/register-face")
-    public ResponseEntity<List<FaceEmbeddingDto>> registerFace(
-            @RequestParam("frames") List<MultipartFile> frames) {
-        List<FaceEmbeddingDto> registeredEmbeddings = faceEmbeddingService.registerFace(frames);
-        return ResponseEntity.status(HttpStatus.CREATED).body(registeredEmbeddings);
     }
 
     // Delete (Soft delete)

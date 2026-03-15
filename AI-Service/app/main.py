@@ -9,19 +9,34 @@ import numpy as np
 from typing import List, Optional
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from pydantic import BaseModel
+from contextlib import asynccontextmanager
 
 from app.services.anti_spoof import get_anti_spoof_service
 from app.services.face_recognition import get_face_recognition_service
+from app.database import create_tables
+from app.routers import face_registration
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Khởi tạo database tables khi startup
+    create_tables()
+    yield
 
 
 app = FastAPI(
     title="Face Attendance System API",
     description="API cho hệ thống chấm công bằng khuôn mặt",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan,
 )
+
+# Đăng ký router đăng ký khuôn mặt mới
+app.include_router(face_registration.router)
 
 
 # ====================== MODELS ======================
+
 
 class FaceVerificationResponse(BaseModel):
     embeddingVector: Optional[List[float]] = None  # 512-dim vector
@@ -30,6 +45,7 @@ class FaceVerificationResponse(BaseModel):
 
 
 # ====================== HELPERS ======================
+
 
 async def file_to_image(file: UploadFile) -> np.ndarray:
     """Chuyển UploadFile thành ảnh numpy array"""
@@ -40,6 +56,7 @@ async def file_to_image(file: UploadFile) -> np.ndarray:
 
 
 # ====================== ENDPOINTS ======================
+
 
 @app.get("/")
 async def root():
@@ -63,54 +80,54 @@ async def check_attendance_image(file: UploadFile = File(...)):
     try:
         # Convert file to image
         image = await file_to_image(file)
-        
+
         if image is None:
             return FaceVerificationResponse(
                 embeddingVector=None,
                 status=400,
-                statusDetail="Không thể decode ảnh. Vui lòng kiểm tra định dạng file."
+                statusDetail="Không thể decode ảnh. Vui lòng kiểm tra định dạng file.",
             )
-        
+
         # Step 1: Anti-spoofing check
         anti_spoof = get_anti_spoof_service()
         spoof_result = anti_spoof.detect_single_image(image)
-        
+
         # Nếu phát hiện là fake hoặc cần xác minh thêm => yêu cầu video xác minh
-        if not spoof_result['is_real'] or spoof_result.get('need_verification', False):
-            if not spoof_result['is_real']:
-                message = "Phát hiện nghi ngờ giả mạo. Vui lòng xác minh bằng video 3 giây."
+        if not spoof_result["is_real"] or spoof_result.get("need_verification", False):
+            if not spoof_result["is_real"]:
+                message = (
+                    "Phát hiện nghi ngờ giả mạo. Vui lòng xác minh bằng video 3 giây."
+                )
             else:
                 message = "Cần xác minh thêm. Vui lòng quay video ngắn 3 giây."
-            
+
             return FaceVerificationResponse(
-                embeddingVector=None,
-                status=400,
-                statusDetail=message
+                embeddingVector=None, status=400, statusDetail=message
             )
-        
+
         # Step 2: Extract embedding
         face_service = get_face_recognition_service()
         embedding_result = face_service.get_embedding(image)
-        
-        if not embedding_result['success']:
+
+        if not embedding_result["success"]:
             return FaceVerificationResponse(
                 embeddingVector=None,
                 status=400,
-                statusDetail=embedding_result.get('error', 'Không phát hiện được khuôn mặt')
+                statusDetail=embedding_result.get(
+                    "error", "Không phát hiện được khuôn mặt"
+                ),
             )
-        
+
         # Success - Return embedding vector
         return FaceVerificationResponse(
-            embeddingVector=embedding_result['embedding'],
+            embeddingVector=embedding_result["embedding"],
             status=200,
-            statusDetail="Xác minh ảnh thành công."
+            statusDetail="Xác minh ảnh thành công.",
         )
-        
+
     except Exception as e:
         return FaceVerificationResponse(
-            embeddingVector=None,
-            status=500,
-            statusDetail=f"Lỗi server: {str(e)}"
+            embeddingVector=None, status=500, statusDetail=f"Lỗi server: {str(e)}"
         )
 
 
@@ -128,68 +145,69 @@ async def verify_video(files: List[UploadFile] = File(...)):
             return FaceVerificationResponse(
                 embeddingVector=None,
                 status=400,
-                statusDetail="Cần ít nhất 5 frames từ video."
+                statusDetail="Cần ít nhất 5 frames từ video.",
             )
-        
+
         # Convert all files to images
         frames = []
         for file in files:
             frame = await file_to_image(file)
             if frame is not None:
                 frames.append(frame)
-        
+
         if len(frames) < 5:
             return FaceVerificationResponse(
                 embeddingVector=None,
                 status=400,
-                statusDetail="Không đủ frames hợp lệ. Vui lòng gửi lại video."
+                statusDetail="Không đủ frames hợp lệ. Vui lòng gửi lại video.",
             )
-        
+
         # Anti-spoofing on all frames
         anti_spoof = get_anti_spoof_service()
         spoof_result = anti_spoof.detect_video_frames(frames)
-        
-        if not spoof_result['is_real']:
+
+        if not spoof_result["is_real"]:
             return FaceVerificationResponse(
                 embeddingVector=None,
                 status=400,
-                statusDetail=f"Xác minh thất bại. Chỉ có {spoof_result['real_frame_ratio']*100:.1f}% frames là thật."
+                statusDetail=f"Xác minh thất bại. Chỉ có {spoof_result['real_frame_ratio'] * 100:.1f}% frames là thật.",
             )
-        
+
         # Find the frame with highest confidence
         best_frame_idx = 0
         best_score = 0
-        for detail in spoof_result.get('details', []):
-            if detail.get('confidence', 0) > best_score:
-                best_score = detail['confidence']
-                best_frame_idx = detail.get('frame_index', 0)
-        
+        for detail in spoof_result.get("details", []):
+            if detail.get("confidence", 0) > best_score:
+                best_score = detail["confidence"]
+                best_frame_idx = detail.get("frame_index", 0)
+
         # Extract embedding from best frame
         face_service = get_face_recognition_service()
         embedding_result = face_service.get_embedding(frames[best_frame_idx])
-        
-        if not embedding_result['success']:
+
+        if not embedding_result["success"]:
             return FaceVerificationResponse(
                 embeddingVector=None,
                 status=400,
-                statusDetail=embedding_result.get('error', 'Không phát hiện được khuôn mặt.')
+                statusDetail=embedding_result.get(
+                    "error", "Không phát hiện được khuôn mặt."
+                ),
             )
-        
+
         # Success
         return FaceVerificationResponse(
-            embeddingVector=embedding_result['embedding'],
+            embeddingVector=embedding_result["embedding"],
             status=200,
-            statusDetail="Xác minh video thành công."
+            statusDetail="Xác minh video thành công.",
         )
-        
+
     except Exception as e:
         return FaceVerificationResponse(
-            embeddingVector=None,
-            status=500,
-            statusDetail=f"Lỗi server: {str(e)}"
+            embeddingVector=None, status=500, statusDetail=f"Lỗi server: {str(e)}"
         )
 
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

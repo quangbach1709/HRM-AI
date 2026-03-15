@@ -1,6 +1,18 @@
 import { FaceEmbedding, SearchFaceEmbeddingDto } from '@/types/face-embedding';
 import { PageResponse } from '@/types/pagination';
 import { api } from './api';
+import axios from 'axios';
+
+const GATEWAY_BASE_URL = import.meta.env.VITE_GATEWAY_URL || 'http://localhost:9000';
+const AI_BASE_URL = `${GATEWAY_BASE_URL}/api/v1/ai`;
+
+/** Tạo axios instance trỏ đến AI Service qua Gateway */
+const aiApi = axios.create({ baseURL: AI_BASE_URL });
+aiApi.interceptors.request.use((config) => {
+  const token = localStorage.getItem('hrm_token');
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
 
 export const faceEmbeddingApi = {
   /**
@@ -28,24 +40,29 @@ export const faceEmbeddingApi = {
   },
 
   /**
-   * Đăng ký khuôn mặt - gửi 3 ảnh góc mặt
+   * Đăng ký khuôn mặt - gửi 3 ảnh góc mặt đến AI Service qua API Gateway
+   * AI Service sẽ:
+   *   1. Trích xuất embedding vector (ArcFace)
+   *   2. Upload ảnh lên MinIO
+   *   3. Lưu embedding vào DB riêng của AI Service
+   *   4. Publish message lên RabbitMQ để Backend Java tạo FaceEmbedding metadata
    */
-  registerFace: async (frames: File[]): Promise<FaceEmbedding[]> => {
+  registerFace: async (frames: File[]): Promise<{ success: boolean; message: string; data: any[] }> => {
     const formData = new FormData();
     frames.forEach((frame) => {
       formData.append('frames', frame);
     });
 
-    const response = await api.post<FaceEmbedding[]>('/face-embeddings/register-face', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await aiApi.post<{ success: boolean; message: string; data: any[] }>(
+      '/face-registration/register',
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
     return response.data;
   },
 
   /**
-   * Cập nhật face embedding
+   * Cập nhật face embedding (HR duyệt: set isActive = true)
    */
   update: async (id: string, data: { personId: string; isActive: boolean; modelVersion?: string }): Promise<FaceEmbedding> => {
     const response = await api.put<FaceEmbedding>(`/face-embeddings/${id}`, {
@@ -63,4 +80,5 @@ export const faceEmbeddingApi = {
     await api.delete(`/face-embeddings/${id}`);
   },
 };
+
 

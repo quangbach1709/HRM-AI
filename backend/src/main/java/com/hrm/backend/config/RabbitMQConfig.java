@@ -11,9 +11,17 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
+    // ── Salary email queue (hiện có) ─────────────────────────────────────────
     public static final String SALARY_EMAIL_QUEUE = "email.salary.queue";
     public static final String EMAIL_EXCHANGE = "email.exchange";
     public static final String SALARY_EMAIL_ROUTING_KEY = "email.salary.key";
+
+    // ── Face Embedding queue (mới — nhận từ AI Service) ──────────────────────
+    public static final String FACE_EMBEDDING_QUEUE = "face.embedding.queue";
+    public static final String FACE_EMBEDDING_EXCHANGE = "face.embedding.exchange";
+    public static final String FACE_EMBEDDING_ROUTING_KEY = "face.embedding.key";
+
+    // ── Beans: Salary Email ───────────────────────────────────────────────────
 
     @Bean
     public Queue salaryEmailQueue() {
@@ -29,6 +37,25 @@ public class RabbitMQConfig {
     public Binding salaryEmailBinding(Queue salaryEmailQueue, TopicExchange emailExchange) {
         return BindingBuilder.bind(salaryEmailQueue).to(emailExchange).with(SALARY_EMAIL_ROUTING_KEY);
     }
+
+    // ── Beans: Face Embedding ─────────────────────────────────────────────────
+
+    @Bean
+    public Queue faceEmbeddingQueue() {
+        return new Queue(FACE_EMBEDDING_QUEUE, true);
+    }
+
+    @Bean
+    public TopicExchange faceEmbeddingExchange() {
+        return new TopicExchange(FACE_EMBEDDING_EXCHANGE);
+    }
+
+    @Bean
+    public Binding faceEmbeddingBinding(Queue faceEmbeddingQueue, TopicExchange faceEmbeddingExchange) {
+        return BindingBuilder.bind(faceEmbeddingQueue).to(faceEmbeddingExchange).with(FACE_EMBEDDING_ROUTING_KEY);
+    }
+
+    // ── Shared Infrastructure ─────────────────────────────────────────────────
 
     @Bean
     public MessageConverter jsonMessageConverter() {

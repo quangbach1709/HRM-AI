@@ -3,9 +3,6 @@ package com.hrm.backend.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-
 @Entity
 @Table(name = "tbl_face_embedding")
 @Data
@@ -15,23 +12,25 @@ public class FaceEmbedding extends AuditableEntity{
     @JoinColumn(name = "person_id", nullable = false)
     private Person person;
 
-    // QUAN TRỌNG: Lưu vector đặc trưng (128 hoặc 512 chiều)
-    // Map sang PostgreSQL kiểu: double precision[]
-    @Column(name = "embedding_vector", columnDefinition = "float8[]")
-    @JdbcTypeCode(SqlTypes.ARRAY)
-    private double[] embeddingVector;
-
-    // Đường dẫn ảnh gốc lúc đăng ký (để audit/kiểm tra lại nếu cần)
+    // Đường dẫn ảnh gốc lúc đăng ký (để HR xét duyệt trực quan)
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "image_url_id")
     private FileDescription imageUrl;
 
-    // Trạng thái (Ví dụ: true là đang dùng, false là khuôn mặt chưa được duyệt)
+    // Trạng thái (false = chờ HR duyệt, true = đã duyệt và đang sử dụng)
     @Column(name = "is_active")
-    private boolean isActive = true;
+    private boolean isActive = false;
 
-    // Model version (Ví dụ: "ArcFace_v1") - phòng trường hợp sau này bạn đổi model AI khác
+    // Model version (Ví dụ: "ArcFace_v1")
     @Column(name = "model_version")
     private String modelVersion;
+
+    // Góc chụp: front / left / right
+    @Column(name = "angle")
+    private String angle;
+
+    // ID của FaceEmbedding bên AI Service (để tra cứu vector khi cần)
+    @Column(name = "ai_embedding_id")
+    private String aiEmbeddingId;
 
 }

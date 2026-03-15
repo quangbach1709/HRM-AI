@@ -2,10 +2,13 @@
 export interface FaceEmbedding {
   id: string;
   personId?: string;
-  embeddingVector?: number[];
-  imageUrl?: any; // FileDescriptionDto object from backend
+  imageUrl?: any; // FileDescriptionDto object from backend (có .url trỏ MinIO)
   active: boolean;
   modelVersion?: string;
+  /** Góc chụp: front / left / right */
+  angle?: string;
+  /** ID tham chiếu bản ghi embedding vector bên AI Service */
+  aiEmbeddingId?: string;
   person?: {
     id: string;
     displayName: string;

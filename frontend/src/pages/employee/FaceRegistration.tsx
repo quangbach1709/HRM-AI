@@ -207,14 +207,19 @@ export default function FaceRegistration() {
       return;
     }
 
+    // Sắp xếp ảnh theo thứ tự: front → left → right để AI Service nhận đúng thứ tự góc
+    const orderedImages = ['front', 'left', 'right']
+      .map((angle) => capturedImages.find((img) => img.angle === angle))
+      .filter(Boolean) as typeof capturedImages;
+
     setIsUploading(true);
     try {
-      const files = capturedImages.map((img) => img.file);
-      await faceEmbeddingApi.registerFace(files);
+      const files = orderedImages.map((img) => img.file);
+      const result = await faceEmbeddingApi.registerFace(files);
 
       toast({
         title: 'Đăng ký thành công',
-        description: '3 ảnh khuôn mặt đã được gửi đi chờ duyệt.',
+        description: result.message || '3 ảnh khuôn mặt đã được gửi đi. Vui lòng chờ HR xét duyệt.',
       });
 
       // Clear captured images
@@ -222,12 +227,13 @@ export default function FaceRegistration() {
       setCapturedImages([]);
       stopCamera();
 
-      // Reload history
-      loadHistory();
+      // Reload history sau một khoảng thời gian ngắn để RabbitMQ kịp xử lý
+      setTimeout(() => loadHistory(), 2000);
     } catch (error: any) {
+      const detail = error.response?.data?.detail || error.response?.data?.error || error.message || 'Đăng ký khuôn mặt thất bại.';
       toast({
         title: 'Lỗi đăng ký',
-        description: error.response?.data?.error || error.message || 'Đăng ký khuôn mặt thất bại.',
+        description: detail,
         variant: 'destructive',
       });
     } finally {
@@ -442,6 +448,7 @@ export default function FaceRegistration() {
                     </p>
                     <p className="text-sm text-muted-foreground">
                       Model: {reg.modelVersion || 'N/A'}
+                      {reg.angle && ` · Góc: ${reg.angle === 'front' ? 'Trực diện' : reg.angle === 'left' ? 'Nghiêng trái' : 'Nghiêng phải'}`}
                     </p>
                   </div>
                   <Badge variant={reg.active ? 'default' : 'secondary'}>
