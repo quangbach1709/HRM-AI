@@ -76,13 +76,22 @@ public class FaceEmbeddingServiceImpl implements FaceEmbeddingService {
     @Transactional
     public FaceEmbeddingDto saveOrUpdate(FaceEmbeddingDto dto) {
         FaceEmbedding entity;
+        boolean isNewEntity = false;
+        boolean statusChanged = false;
+        boolean oldStatus = false;
 
         if (dto.getId() != null) {
             entity = faceEmbeddingRepository.findById(dto.getId())
                     .orElseThrow(
                             () -> new EntityNotFoundException("Không tìm thấy FaceEmbedding với ID: " + dto.getId()));
+            // Kiểm tra xem status có thay đổi không
+            oldStatus = entity.isActive();
+            if (oldStatus != dto.isActive()) {
+                statusChanged = true;
+            }
         } else {
             entity = new FaceEmbedding();
+            isNewEntity = true;
         }
 
         if (dto.getPerson() != null && dto.getPerson().getId() != null) {
@@ -104,10 +113,41 @@ public class FaceEmbeddingServiceImpl implements FaceEmbeddingService {
         entity.setActive(dto.isActive());
         entity.setModelVersion(dto.getModelVersion());
         entity.setAngle(dto.getAngle());
-        entity.setAiEmbeddingId(dto.getAiEmbeddingId());
 
         FaceEmbedding saved = faceEmbeddingRepository.save(entity);
+
+        // Nếu status thay đổi và entity đã có aiEmbeddingId thì đồng bộ sang AI Service
+        if (statusChanged && saved.getAiEmbeddingId() != null) {
+            publishStatusChangeToAI(saved);
+        }
+
         return toDto(saved);
+    }
+
+    /**
+     * Đồng bộ thay đổi status của khuôn mặt sang AI Service qua RabbitMQ.
+     * Gọi từ saveOrUpdate() khi status thay đổi.
+     *
+     * @param saved FaceEmbedding entity vừa được save (với status mới)
+     */
+    private void publishStatusChangeToAI(FaceEmbedding saved) {
+        try {
+            FaceApprovalMessage message = new FaceApprovalMessage(
+                    saved.getAiEmbeddingId(),
+                    saved.getId().toString(),
+                    saved.isActive(),
+                    null
+            );
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConfig.FACE_APPROVAL_EXCHANGE,
+                    RabbitMQConfig.FACE_APPROVAL_ROUTING_KEY,
+                    message
+            );
+            log.info("Published face status change via saveOrUpdate: aiEmbeddingId={}, isActive={}, backendId={}",
+                    saved.getAiEmbeddingId(), saved.isActive(), saved.getId());
+        } catch (Exception e) {
+            log.error("Không thể publish face status change message lên RabbitMQ: {}", e.getMessage(), e);
+        }
     }
 
     @Override
@@ -124,9 +164,35 @@ public class FaceEmbeddingServiceImpl implements FaceEmbeddingService {
         FaceEmbedding entity = faceEmbeddingRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy FaceEmbedding với ID: " + id));
 
+        // 1. Soft delete trong DB backend
         entity.setActive(false);
         entity.setVoided(true);
-        faceEmbeddingRepository.save(entity);
+        FaceEmbedding saved = faceEmbeddingRepository.save(entity);
+        
+        // 2. Publish RabbitMQ message để AI Service cập nhật is_active = false
+        if (saved.getAiEmbeddingId() != null) {
+            FaceApprovalMessage message = new FaceApprovalMessage(
+                    saved.getAiEmbeddingId(),           // aiEmbeddingId
+                    saved.getId().toString(),           // backendEmbeddingId
+                    false,                              // isActive = false (deletion)
+                    "system"                            // approvedBy
+            );
+            try {
+                rabbitTemplate.convertAndSend(
+                        RabbitMQConfig.FACE_APPROVAL_EXCHANGE,
+                        RabbitMQConfig.FACE_APPROVAL_ROUTING_KEY,
+                        message
+                );
+                log.info("Published face deletion message: aiEmbeddingId={}, backendId={}",
+                        saved.getAiEmbeddingId(), saved.getId());
+            } catch (Exception e) {
+                // Không rollback - backend delete đã thành công.
+                // AI Service sẽ đồng bộ sau khi kết nối RabbitMQ phục hồi.
+                log.error("Không thể publish face deletion message lên RabbitMQ: {}", e.getMessage(), e);
+            }
+        } else {
+            log.warn("FaceEmbedding id={} không có aiEmbeddingId — bỏ qua publish RabbitMQ", id);
+        }
     }
 
     @Override

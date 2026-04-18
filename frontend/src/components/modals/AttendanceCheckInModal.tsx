@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { StaffWorkScheduleFormData } from '../../types/staffWorkSchedule';
-import { staffWorkScheduleApi } from '../../services/staffWorkScheduleApi';
+import { aiAttendanceApi } from '../../services/aiAttendanceApi';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../ui/dialog';
@@ -220,33 +219,31 @@ export function AttendanceCheckInModal({
 
         setLoading(true);
         try {
-            const submitData: StaffWorkScheduleFormData = {
-                staffId: staff.id,
-                workingDate: today,
-                shiftWorkType: shiftWorkType,
-            };
+            const result = await aiAttendanceApi.verifyVideo(frames, staff.id, shiftWorkType);
 
-            await staffWorkScheduleApi.attendance(submitData, frames);
-
-            toast({
-                title: 'Chấm công thành công!',
-                description: `Đã chấm công lúc ${new Date().toLocaleTimeString('vi-VN')}`,
-                variant: 'default',
-            });
-            onSuccess();
-            handleClose();
-        } catch (err: any) {
-            const message = err.response?.data?.message || err.message || 'Có lỗi xảy ra';
-            setErrorMessage(message);
-            toast({ title: 'Lỗi chấm công', description: message, variant: 'destructive' });
-            // If video verification was tried, allow retry
-            if (requiresVideoVerification) {
+            if (result.verified) {
+                toast({
+                    title: 'Chấm công thành công!',
+                    description: `Đã chấm công lúc ${new Date().toLocaleTimeString('vi-VN')}`,
+                    variant: 'default',
+                });
+                onSuccess();
+                handleClose();
+            } else {
+                const message = result.message || 'Xác thực khuôn mặt thất bại. Vui lòng thử lại.';
+                setErrorMessage(message);
+                toast({ title: 'Lỗi chấm công', description: message, variant: 'destructive' });
                 setRequiresVideoVerification(true);
             }
+        } catch (err: any) {
+            const message = err.response?.data?.detail || err.response?.data?.message || err.message || 'Có lỗi xảy ra';
+            setErrorMessage(message);
+            toast({ title: 'Lỗi chấm công', description: message, variant: 'destructive' });
+            setRequiresVideoVerification(true);
         } finally {
             setLoading(false);
         }
-    }, [staff?.id, today, shiftWorkType, toast, onSuccess, requiresVideoVerification]);
+    }, [staff?.id, shiftWorkType, toast, onSuccess]);
 
     const handleSubmit = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
@@ -272,25 +269,48 @@ export function AttendanceCheckInModal({
         setLoading(true);
         setErrorMessage(null);
         try {
-            const submitData: StaffWorkScheduleFormData = {
-                staffId: staff.id,
-                workingDate: today,
-                shiftWorkType: shiftWorkType,
-            };
+            const result = await aiAttendanceApi.checkImage(capturedImage.file, staff.id, shiftWorkType);
 
-            await staffWorkScheduleApi.attendance(submitData, [capturedImage.file]);
-
-            toast({
-                title: 'Chấm công thành công!',
-                description: `Đã chấm công lúc ${new Date().toLocaleTimeString('vi-VN')}`,
-                variant: 'default',
-            });
-            onSuccess();
-            handleClose();
+            if (result.verified) {
+                toast({
+                    title: 'Chấm công thành công!',
+                    description: `Đã chấm công lúc ${new Date().toLocaleTimeString('vi-VN')}`,
+                    variant: 'default',
+                });
+                onSuccess();
+                handleClose();
+            } else if (result.requireVideoVerification) {
+                // Ảnh bị nghi giả mạo → chuyển sang xác minh bằng video
+                setErrorMessage(result.message || 'Phát hiện ảnh giả mạo. Vui lòng quay video để xác minh.');
+                setRequiresVideoVerification(true);
+                if (capturedImage) {
+                    URL.revokeObjectURL(capturedImage.previewUrl);
+                    setCapturedImage(null);
+                }
+                toast({
+                    title: 'Cần xác minh thêm',
+                    description: 'Vui lòng quay video ngắn 3 giây để xác minh.',
+                    variant: 'destructive',
+                });
+                startCamera();
+            } else {
+                const message = result.message || 'Xác thực khuôn mặt thất bại. Vui lòng thử lại.';
+                setErrorMessage(message);
+                setRequiresVideoVerification(true);
+                if (capturedImage) {
+                    URL.revokeObjectURL(capturedImage.previewUrl);
+                    setCapturedImage(null);
+                }
+                toast({
+                    title: 'Cần xác minh thêm',
+                    description: 'Vui lòng quay video ngắn 3 giây để xác minh.',
+                    variant: 'destructive',
+                });
+                startCamera();
+            }
         } catch (err: any) {
-            const message = err.response?.data?.message || err.message || 'Có lỗi xảy ra';
+            const message = err.response?.data?.detail || err.response?.data?.message || err.message || 'Có lỗi xảy ra';
             setErrorMessage(message);
-            // Trigger video verification on failure
             setRequiresVideoVerification(true);
             if (capturedImage) {
                 URL.revokeObjectURL(capturedImage.previewUrl);
@@ -305,7 +325,7 @@ export function AttendanceCheckInModal({
         } finally {
             setLoading(false);
         }
-    }, [staff?.id, capturedImage, today, shiftWorkType, toast, onSuccess, startCamera]);
+    }, [staff?.id, capturedImage, shiftWorkType, toast, onSuccess, startCamera]);
 
     const handleClose = useCallback(() => {
         stopCamera();

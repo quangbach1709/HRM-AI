@@ -55,30 +55,38 @@ class FaceEmbeddingService:
     
     def get_embedding(self, image: np.ndarray) -> Dict:
         """
-        Trích xuất embedding từ ảnh
-        
-        Args:
-            image: Ảnh chứa khuôn mặt
-            
+        Trích xuất embedding từ ảnh.
+
         Returns:
-            Dict với embedding vector hoặc error
+            Dict với:
+            - success: bool
+            - embedding: list[float] (512-dim, đã L2-normalize)
+            - face_confidence: float (độ tin cậy phát hiện khuôn mặt, 0-1)
+            - bbox: list
+            - error: str (nếu thất bại)
         """
-        # Detect face
         face = self.detect_face(image)
         
         if face is None:
             return {
                 'success': False,
                 'embedding': None,
+                'face_confidence': 0.0,
                 'error': 'Không phát hiện được khuôn mặt trong ảnh'
             }
         
-        # Extract embedding
         embedding = self.extract_embedding(image, face['landmarks'])
+        vec = embedding.flatten()
+
+        # Đảm bảo vector đã L2-normalize trước khi lưu/so sánh
+        norm = np.linalg.norm(vec)
+        if norm > 1e-8:
+            vec = vec / norm
         
         return {
             'success': True,
-            'embedding': embedding.flatten().tolist(),  # Convert to list for JSON serialization
+            'embedding': vec.tolist(),
+            'face_confidence': float(face.get('confidence', 1.0)),
             'bbox': face['bbox'].tolist() if hasattr(face['bbox'], 'tolist') else face['bbox']
         }
 

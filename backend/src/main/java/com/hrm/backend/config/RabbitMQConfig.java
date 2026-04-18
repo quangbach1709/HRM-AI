@@ -26,6 +26,11 @@ public class RabbitMQConfig {
     public static final String FACE_APPROVAL_EXCHANGE = "face.approval.exchange";
     public static final String FACE_APPROVAL_ROUTING_KEY = "face.approval.key";
 
+    // ── Attendance Result queue (nhận từ AI Service — kết quả xác thực khuôn mặt) ─
+    public static final String ATTENDANCE_RESULT_QUEUE = "attendance.result.queue";
+    public static final String ATTENDANCE_RESULT_EXCHANGE = "attendance.result.exchange";
+    public static final String ATTENDANCE_RESULT_ROUTING_KEY = "attendance.result.key";
+
     // ── Beans: Salary Email ───────────────────────────────────────────────────
 
     @Bean
@@ -75,6 +80,23 @@ public class RabbitMQConfig {
     @Bean
     public Binding faceApprovalBinding(Queue faceApprovalQueue, TopicExchange faceApprovalExchange) {
         return BindingBuilder.bind(faceApprovalQueue).to(faceApprovalExchange).with(FACE_APPROVAL_ROUTING_KEY);
+    }
+
+    // ── Beans: Attendance Result ──────────────────────────────────────────────
+
+    @Bean
+    public Queue attendanceResultQueue() {
+        return new Queue(ATTENDANCE_RESULT_QUEUE, true);
+    }
+
+    @Bean
+    public TopicExchange attendanceResultExchange() {
+        return new TopicExchange(ATTENDANCE_RESULT_EXCHANGE);
+    }
+
+    @Bean
+    public Binding attendanceResultBinding(Queue attendanceResultQueue, TopicExchange attendanceResultExchange) {
+        return BindingBuilder.bind(attendanceResultQueue).to(attendanceResultExchange).with(ATTENDANCE_RESULT_ROUTING_KEY);
     }
 
     // ── Shared Infrastructure ─────────────────────────────────────────────────

@@ -1,12 +1,9 @@
 package com.hrm.backend.service.impl;
 
-import com.hrm.backend.dto.AIFaceVerificationResponse;
 import com.hrm.backend.dto.StaffWorkScheduleDto;
 
 import com.hrm.backend.dto.response.PageResponse;
 import com.hrm.backend.dto.search.SearchStaffWorkScheduleDto;
-import com.hrm.backend.dto.PersonDto;
-import com.hrm.backend.dto.FaceEmbeddingDto;
 import com.hrm.backend.entity.Staff;
 import com.hrm.backend.entity.StaffWorkSchedule;
 import com.hrm.backend.repository.StaffRepository;
@@ -38,8 +35,6 @@ public class StaffWorkScheduleServiceImpl implements StaffWorkScheduleService {
     private final StaffWorkScheduleSpecification specification;
     private final StaffRepository staffRepository;
     private final StaffService staffService;
-    private final FaceEmbeddingService faceEmbeddingService;
-    private final PersonService personService;
     private final DashboardStatService dashboardStatService;
 
     // ==================== PAGINATION ====================
@@ -168,43 +163,6 @@ public class StaffWorkScheduleServiceImpl implements StaffWorkScheduleService {
     @Transactional
     public StaffWorkScheduleDto attendance(StaffWorkScheduleDto dto, List<MultipartFile> frames) {
 
-        // --- FACE VERIFICATION LOGIC ---
-        if (frames == null || frames.isEmpty()) {
-            throw new IllegalArgumentException("Hình ảnh khuôn mặt là bắt buộc để chấm công.");
-        }
-
-        // 1. Call AI Service to check liveness and get embedding
-        AIFaceVerificationResponse aiResponse = faceEmbeddingService.callAIService(frames);
-
-        if (aiResponse.getStatus() != 200) {
-            throw new IllegalArgumentException("Lỗi xác thực khuôn mặt từ AI: " + aiResponse.getStatusDetail());
-        }
-
-        if (aiResponse.getEmbeddingVector() == null || aiResponse.getEmbeddingVector().isEmpty()) {
-            throw new IllegalArgumentException("Không tìm thấy dữ liệu khuôn mặt trong ảnh.");
-        }
-
-        // Convert List<Double> to double[]
-        double[] inputVector = aiResponse.getEmbeddingVector().stream()
-                .mapToDouble(Double::doubleValue)
-                .toArray();
-
-
-        PersonDto personDto = personService.getCurrentPerson();
-
-        FaceEmbeddingDto verificationDto = new FaceEmbeddingDto();
-        verificationDto.setPerson(personDto);
-        verificationDto.setEmbeddingVector(inputVector);
-
-        // 4. Verify against registered embeddings
-        // verifyFace throws IllegalArgumentException if mismatch or replay attack
-        boolean isVerified = faceEmbeddingService.verifyFace(verificationDto);
-
-        if (!isVerified) {
-            throw new IllegalArgumentException(
-                    "Xác thực khuôn mặt thất bại. Khuôn mặt không khớp với dữ liệu đã đăng ký.");
-        }
-        // --- END VERIFICATION ---
         if (dto.getStaffId() == null) {
             throw new IllegalArgumentException("Staff is required for attendance");
         }

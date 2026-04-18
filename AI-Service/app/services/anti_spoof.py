@@ -9,7 +9,10 @@ import cv2
 import numpy as np
 import torch
 import torch.nn. functional as F
+import logging
 from typing import Tuple, List, Dict
+
+logger = logging.getLogger(__name__)
 
 # Thêm path tới Silent-Face-Anti-Spoofing
 SILENT_FACE_PATH = os.path. join(os.path.dirname(__file__), '..', '..', 'Silent-Face-Anti-Spoofing')
@@ -38,10 +41,15 @@ class AntiSpoofService:
         self.model_test = AntiSpoofPredict(device_id)
         self.image_cropper = CropImage()
         
-        # Ngưỡng quyết định (có thể điều chỉnh)
-        self.real_threshold = 0.7  # Trên ngưỡng này => Real
-        self.fake_threshold = 0.3  # Dưới ngưỡng này => Fake
-        # Giữa 2 ngưỡng => Cần xác minh thêm
+        # Ngưỡng quyết định - đã calibrate từ 0.7->0.5 để tránh false negative
+        # Score từ Silent-Face-Anti-Spoofing: [0=Spoof, 1=Real, 2=Unknown]
+        # Chúng ta dùng score cho class 1 (Real face) để quyết định
+        self.real_threshold = 0.5   # Score >= 0.5 => Real face
+        self.fake_threshold = 0.3   # Score <= 0.3 => Fake face
+        # Giữa 0.3-0.5 => Cần xác minh thêm bằng video
+        
+        logger.info(f"AntiSpoofService initialized with model_dir: {self.model_dir}")
+        logger.info(f"Thresholds: real={self.real_threshold}, fake={self.fake_threshold}")
     
     def check_image_ratio(self, image:  np.ndarray) -> bool:
         """Kiểm tra tỷ lệ ảnh có phù hợp không (3:4)"""
@@ -52,26 +60,12 @@ class AntiSpoofService:
     
     def preprocess_image(self, image: np. ndarray) -> np.ndarray:
         """
-        Tiền xử lý ảnh để phù hợp với model
+        Tiền xử lý ảnh để phù hợp với model.
+        
+        Note: Loại bỏ padding bằng black color vì nó làm model bị confuse.
+        Model sẽ tự crop từ bbox, không cần preprocess aspect ratio.
         """
-        height, width = image. shape[:2]
-        
-        # Resize về tỷ lệ 3:4 nếu cần
-        if width / height != 3/4:
-            new_height = int(width * 4 / 3)
-            if new_height > height:
-                # Thêm padding
-                pad_top = (new_height - height) // 2
-                pad_bottom = new_height - height - pad_top
-                image = cv2.copyMakeBorder(
-                    image, pad_top, pad_bottom, 0, 0,
-                    cv2.BORDER_CONSTANT, value=[0, 0, 0]
-                )
-            else:
-                # Crop
-                start = (height - new_height) // 2
-                image = image[start:start+new_height, : , :]
-        
+        # Không thay đổi ảnh - để model crop từ bbox
         return image
     
     def detect_single_image(self, image:  np.ndarray) -> Dict:
@@ -88,13 +82,20 @@ class AntiSpoofService:
             - need_verification: bool
             - bbox: list [x, y, w, h]
         """
+        logger.info("=" * 60)
+        logger.info("Starting face liveness detection")
+        logger.info(f"Input image shape: {image.shape}")
+        
         # Preprocess
         image = self.preprocess_image(image)
+        logger.info(f"After preprocess shape: {image.shape}")
         
         # Detect face bbox
         try:
             image_bbox = self.model_test.get_bbox(image)
-        except Exception as e: 
+            logger.info(f"Face bbox detected: {image_bbox}")
+        except Exception as e:
+            logger.error(f"Face detection failed: {e}", exc_info=True)
             return {
                 'is_real': False,
                 'confidence': 0.0,
@@ -104,13 +105,19 @@ class AntiSpoofService:
             }
         
         prediction = np.zeros((1, 3))
+        model_count = 0
         
         # Chạy qua tất cả các models
+        logger.info(f"Models directory: {self.model_dir}")
         for model_name in os.listdir(self.model_dir):
             if not model_name.endswith('.pth'):
                 continue
+            
+            model_count += 1
+            logger.info(f"Running model {model_count}: {model_name}")
                 
             h_input, w_input, model_type, scale = parse_model_name(model_name)
+            logger.debug(f"Model config: h={h_input}, w={w_input}, type={model_type}, scale={scale}")
             
             param = {
                 "org_img": image,
@@ -125,25 +132,61 @@ class AntiSpoofService:
                 param["crop"] = False
                 
             img = self.image_cropper.crop(**param)
+            logger.debug(f"Cropped image shape: {img.shape}")
+            
             model_path = os.path.join(self. model_dir, model_name)
-            prediction += self.model_test.predict(img, model_path)
+            model_result = self.model_test.predict(img, model_path)
+            logger.info(f"Model {model_name} output: {model_result}")
+            prediction += model_result
         
-        # Tính điểm cuối cùng
-        label = np.argmax(prediction)
-        # Score cho label=1 (Real Face)
-        score = prediction[0][1] / 2  # Chia 2 vì có 2 models
+        logger.info(f"Total models processed: {model_count}")
+        logger.info(f"Accumulated prediction: {prediction}")
         
-        # Quyết định
-        is_real = label == 1
-        need_verification = self.fake_threshold < score < self.real_threshold
+        # Tính score trung bình từ tất cả models
+        if model_count == 0:
+            logger.error("No models found in model directory!")
+            return {
+                'is_real': False,
+                'confidence': 0.0,
+                'need_verification': False,
+                'bbox': None,
+                'error': 'Không tìm thấy model nào'
+            }
         
-        return {
-            'is_real': is_real and score >= self.real_threshold,
-            'confidence': float(score),
-            'need_verification':  need_verification,
+        # Score cho class 1 (Real Face) - lấy trung bình từ tất cả models
+        score = float(prediction[0][1] / model_count)
+        label = int(np.argmax(prediction))
+        
+        logger.info(f"Score calculation: {prediction[0][1]} / {model_count} = {score:.4f}")
+        logger.info(f"Label (argmax): {label}")
+        logger.info(f"Thresholds: real={self.real_threshold}, fake={self.fake_threshold}")
+        
+        # Quyết định dựa trên score
+        if score >= self.real_threshold:
+            is_real = True
+            need_verification = False
+            logger.info(f"✅ Decision: REAL (score {score:.4f} >= {self.real_threshold})")
+        elif score <= self.fake_threshold:
+            is_real = False
+            need_verification = False
+            logger.info(f"❌ Decision: FAKE (score {score:.4f} <= {self.fake_threshold})")
+        else:
+            is_real = False
+            need_verification = True
+            logger.info(f"⚠️  Decision: NEED_VERIFICATION ({self.fake_threshold} < score {score:.4f} < {self.real_threshold})")
+        
+        result = {
+            'is_real': is_real,
+            'confidence': score,
+            'need_verification': need_verification,
             'bbox': image_bbox,
-            'label': int(label)
+            'label': label
         }
+        
+        logger.info(f"Final result: {result}")
+        logger.info("=" * 60)
+        
+        return result
     
     def detect_video_frames(self, frames: List[np. ndarray]) -> Dict:
         """
