@@ -40,7 +40,9 @@ public class SalaryResultDto extends AuditableDto {
             return null;
         }
         SalaryResult entity = new SalaryResult();
-        entity.setId(dto.getId());
+        if (dto.getId() != null) {
+            entity.setId(dto.getId());
+        }
         entity.setName(dto.getName());
         entity.setSalaryPeriod(SalaryPeriodDto.toEntity(dto.getSalaryPeriod()));
         entity.setSalaryTemplate(SalaryTemplateDto.toEntity(dto.getSalaryTemplate()));

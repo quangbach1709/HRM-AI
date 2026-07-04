@@ -71,15 +71,19 @@ public class SalaryResultServiceImpl implements SalaryResultService {
     @Override
     @Transactional
     public SalaryResultDto create(SalaryResultDto dto) {
-        validateForCreate(dto);
+        try {
+            validateForCreate(dto);
 
-        SalaryResult entity = SalaryResultDto.toEntity(dto);
+            SalaryResult entity = SalaryResultDto.toEntity(dto);
 
-        entity.setCreatedAt(LocalDateTime.now());
-        entity.setVoided(false);
+            entity.setCreatedAt(LocalDateTime.now());
+            entity.setVoided(false);
 
-        entity = repository.save(entity);
-        return new SalaryResultDto(entity, true);
+            entity = repository.save(entity);
+            return new SalaryResultDto(entity, true);
+        } catch (Exception e) {
+            throw new RuntimeException("Error creating SalaryResult: " + e.getMessage());
+        }
     }
 
     @Override
