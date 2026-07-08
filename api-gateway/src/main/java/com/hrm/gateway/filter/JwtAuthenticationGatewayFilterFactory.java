@@ -47,7 +47,8 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
     private static final List<String> PUBLIC_PATHS = List.of(
             "/api/v1/hr/auth/login",
             "/api/v1/hr/auth/register",
-            "/api/v1/hr/actuator/health"
+            "/api/v1/hr/actuator/health",
+            "/api/v1/hr/file-descriptions"
     );
 
     @Value("${jwt.secret:your-256-bit-secret-key-here-must-be-at-least-32-characters}")
